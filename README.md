@@ -3,8 +3,8 @@ A collection of sample[Terraform](https://www.terraform.io/) configurations &amp
 
 ## Contents
 Each subdirectory in this repository contains the configuration files for a specific scenario
-- [Routing through a NAT instance](https://github.com/gdlyan/yc-playground/tree/main/nat-instance-tf)
-- [Swarm Routing Mesh Demo](https://github.com/gdlyan/yc-playground/tree/main/docker-swarm-tf)
+- [Routing through a NAT instance](https://github.com/gdlyan/yc-playground/tree/master/nat-instance-tf)
+- [Swarm Routing Mesh Demo](https://github.com/gdlyan/yc-playground/tree/master/docker-swarm-tf)
 
 All the configurations are tailored for quickstart. The user does not need to install and configure Terraform and Ansible packages locally because each example comes with shell files, such as `./dterraform` and occasionally `./dansible-playbook`, that use "docker run" to run Terraform and Ansible within containers. To make the full setup work, you only need to have Docker installed. While aware that such a setup is not advised for use in production, this is done on purpose.
 
