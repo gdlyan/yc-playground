@@ -1,4 +1,4 @@
-# docker-swarm-tf
+# Swarm Routing Mesh Demo
 Terraform &amp; Ansible config for arbitrary web application deployment on a Swarm cluster @ Yandex Cloud 
 
 ## Use case
@@ -12,7 +12,7 @@ The purpose of this configuration is to ease the learning curve of a full-stack 
 - Docker and optionally Compose
 - A pair of ssh keys whereas a public key would be uploaded to the provisioned virtual machines. Please note that the current config fails with passphrase protected keys, so if your default ssh key pair is passphrase protected please be sure to generate a dedicated key pair. 
 - Yandex Cloud account that has a payment method activated, [see how-to](https://cloud.yandex.com/en-ru/docs/billing/operations/create-new-account)
-- Yandex cloud CLI installed with `curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash` and initialized with `yc init` as explained in the [Getting started with the YC CLI manual](https://cloud.yandex.com/en-ru/docs/cli/quickstart). 
+- Yandex Cloud CLI installed with `curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash` and initialized with `yc init` as explained in the [Getting started with the YC CLI manual](https://cloud.yandex.com/en-ru/docs/cli/quickstart). 
 - You will need to create a file `./terraform.tfvars` with the following content:
 ```
 token             = "<Yandex Cloud OAuth token, available from `yc config list` command>"

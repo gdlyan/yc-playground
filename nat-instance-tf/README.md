@@ -4,9 +4,9 @@ Terraform  config for automation of [Routing through a NAT instance](https://clo
 ## Requirements
 - Linux / MacOS / Windows with WSL2 machine connected to Internet
 - Docker and optionally Compose
-- A pair of ssh keys whereas a public key would be uploaded to the provisioned virtual machinesNAT instance 
+- A pair of ssh keys whereas a public key would be uploaded to the provisioned virtual machines 
 - Yandex Cloud account that has a payment method activated, [see how-to](https://cloud.yandex.com/en-ru/docs/billing/operations/create-new-account)
-- Yandex cloud CLI installed with `curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash` and initialized with `yc init` as explained in the [Getting started with the YC CLI manual](https://cloud.yandex.com/en-ru/docs/cli/quickstart). 
+- Yandex Cloud CLI installed with `curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash` and initialized with `yc init` as explained in the [Getting started with the YC CLI manual](https://cloud.yandex.com/en-ru/docs/cli/quickstart). 
 - You will need to create a file `./terraform.tfvars` with the following content:
 ```
 token             = "<Yandex Cloud OAuth token, available from `yc config list` command>"
@@ -32,7 +32,7 @@ This will pull Terraform image from Docker Hub, spawn the Terraform container an
 ./dterraform apply -auto-approve
 ```
 This will create a Virtual Private Cloud (VPC) and two subnets - the public and the private ones. In each of those subnets a low-tier Ubuntu VM will be spawned. 
-- The instance provisioned in the public subnet will be assigned with a dynamic public IP address and be accessible via `ssh -i ~/.ssh/<private_key_file> <default_user>@<public IP>`. This is NAT Instance which also serves as bastion host that allows `ssh` access to the instances isolated from the public internet within a VPC, such as the following one
+- The instance provisioned in the public subnet will be assigned with a dynamic public IP address and be accessible via `ssh -i ~/.ssh/<private_key_file> <default_user>@<public IP>`. This is NAT Instance which also serves as a bastion host that allows `ssh` access to the instances isolated from the public internet within a VPC, such as the following one
 - The instance provisioned in the private subnet will not have any public IP address and will only be accessible via `ssh` from NAT instance. However this instance would allow internet traffic via NAT instance, for example, to install packages from package managers and test connections.   This is test instance 
 
 The result would look like the one below if it worked:
@@ -53,7 +53,7 @@ vpc_name = "nat-instance-vpc-tf"
 - Run `./dterraform output` to view once again the public IP of the provisioned virtual machines
 - Ssh into the NAT Instance using `ssh -i ~/.ssh/<private_key_file> <default_user>@<public IP>`
 - From the NAT instance ssh into test instance using `ssh <private IP>`, use the password `nobodyknows`
-- On the test instance run `curl ifconfig.co`. ou should get the `<Public IP>` as the outcome
+- On the test instance run `curl ifconfig.co`. You should get the `<Public IP>` as the outcome
 - Use `exit` command to eit both test an NAT instances
 
 ### 5. Destroy infrastructure if you no longer need it
