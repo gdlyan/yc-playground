@@ -32,5 +32,6 @@ resource "yandex_compute_instance" "ipsec_instances" {
   network_interface {
       subnet_id = yandex_vpc_subnet.web_front_subnets[var.ipsec_instances[count.index].subnet_ix].id
       nat       = true 
+      security_group_ids = [yandex_vpc_security_group.vpn_sg.id]
   }  
 }

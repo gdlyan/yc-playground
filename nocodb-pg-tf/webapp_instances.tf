@@ -34,5 +34,6 @@ resource "yandex_compute_instance" "webapp_instances" {
 
   network_interface {
       subnet_id       = yandex_vpc_subnet.webapp_subnets[var.webapp_instances[count.index].subnet_ix].id
+      security_group_ids = [yandex_vpc_security_group.web_service_sg.id]
   }  
 }
