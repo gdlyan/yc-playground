@@ -38,11 +38,16 @@ variable "webapp_subnets" {
 }
 
 variable "webapp_instances" {
- description = "node is a manager or a worker"
+ description = "contanerized webapp"
  type = list(object({ subnet_ix = number }))
  default = [{"subnet_ix" : 0},
             {"subnet_ix" : 1},
             {"subnet_ix" : 2}]
 }
 
+variable "ipsec_instances" {
+ description = "VPN"
+ type = list(object({ subnet_ix = number }))
+ default = [{"subnet_ix" : 0}]
+}
 
