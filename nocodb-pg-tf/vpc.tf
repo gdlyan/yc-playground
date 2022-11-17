@@ -19,4 +19,5 @@ resource "yandex_vpc_subnet" "webapp_subnets" {
   description = "Isolated subnet for web applications frontend and backend"
   zone = var.webapp_subnets[count.index].zone
   v4_cidr_blocks = var.webapp_subnets[count.index].v4_cidr_blocks
+  route_table_id = yandex_vpc_route_table.vpn_route_table_tf.id
 }
