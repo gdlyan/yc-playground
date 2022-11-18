@@ -34,6 +34,26 @@ resource "yandex_compute_instance" "webapp_instances" {
 
   network_interface {
       subnet_id       = yandex_vpc_subnet.webapp_subnets[var.webapp_instances[count.index].subnet_ix].id
-      security_group_ids = [yandex_vpc_security_group.web_service_sg.id]
+      # nat = true
   }  
+
+  metadata = {
+    # docker-compose = file("${path.module}/docker-compose-app.yaml")
+    docker-compose = <<-EOT
+      version: '3'
+      services:
+        nocodb_app: 
+          container_name: nocodb_app
+          environment: 
+            NC_AUTH_JWT_SECRET: "569a1821-0a93-45e8-87ab-eb857f20a010"
+            NC_DB: "pg://${yandex_compute_instance.pg_docker_instances.0.network_interface.0.ip_address}:5432?u=${var.default_user}&p=${var.postgres_password}&d=${var.nocodb_database}" 
+          image: "nocodb/nocodb:latest"
+          ports:
+            - 80:8080
+          restart: unless-stopped
+          volumes: 
+            - "./nocodb/data:/usr/app/data"    
+      EOT
+    ssh-keys = "${var.default_user}:${file("~/.ssh/${var.private_key_file}.pub")}"
+  }
 }

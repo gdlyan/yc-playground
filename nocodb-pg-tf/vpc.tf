@@ -3,6 +3,7 @@ resource "yandex_vpc_network" "web_service_vpc_tf" {
   description = "Terraform managed VPC for basic web-service"
 }
 
+
 resource "yandex_vpc_subnet" "web_front_subnets" {
   count = length(var.web_front_subnets)
   network_id = yandex_vpc_network.web_service_vpc_tf.id
@@ -12,6 +13,7 @@ resource "yandex_vpc_subnet" "web_front_subnets" {
   v4_cidr_blocks = var.web_front_subnets[count.index].v4_cidr_blocks
 }
 
+
 resource "yandex_vpc_subnet" "webapp_subnets" {
   count = length(var.webapp_subnets)
   network_id = yandex_vpc_network.web_service_vpc_tf.id
@@ -19,5 +21,5 @@ resource "yandex_vpc_subnet" "webapp_subnets" {
   description = "Isolated subnet for web applications frontend and backend"
   zone = var.webapp_subnets[count.index].zone
   v4_cidr_blocks = var.webapp_subnets[count.index].v4_cidr_blocks
-  route_table_id = yandex_vpc_route_table.vpn_route_table_tf.id
+  route_table_id = yandex_vpc_route_table.nat_route_table_tf.id
 }

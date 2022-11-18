@@ -23,6 +23,21 @@ variable "private_key_file" {
   default     = "id_rsa"
 }
 
+variable "postgres_password" {
+  description = "Postgres password for default_user"
+  type        = string  
+}
+
+variable "pgadmin_credentials" {
+  type        =  object({email = string, password = string})  
+}
+
+variable "nocodb_database" {
+  description = "Postgres database name for nocodb"
+  type        = string  
+  default     = "nocodb_database"
+}
+
 variable "web_front_subnets" {
  description = "Public subnets for instances that are directly exposed to web-traffic such as Load balancers, NAT, gateways, bastions etc."
  type =  list(object({zone = string, v4_cidr_blocks = list(string)}))
@@ -40,13 +55,17 @@ variable "webapp_subnets" {
 variable "webapp_instances" {
  description = "contanerized webapp"
  type = list(object({ subnet_ix = number }))
- default = [{"subnet_ix" : 0},
-            {"subnet_ix" : 1},
-            {"subnet_ix" : 2}]
+ default = [{"subnet_ix" : 0}]
 }
 
 variable "ipsec_instances" {
  description = "VPN"
+ type = list(object({ subnet_ix = number }))
+ default = [{"subnet_ix" : 0}]
+}
+
+variable "pg_docker_instances" {
+ description = "small postgres database - docker container"
  type = list(object({ subnet_ix = number }))
  default = [{"subnet_ix" : 0}]
 }
