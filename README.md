@@ -1,5 +1,5 @@
 # yc-playground
-A collection of sample[Terraform](https://www.terraform.io/) configurations &amp; [Ansible](https://github.com/ansible/ansible) playbooks for various infrastructure and application bootstrapping scenarios using Yandex Cloud platform 
+A collection of sample [Terraform](https://www.terraform.io/) configurations &amp; [Ansible](https://github.com/ansible/ansible) playbooks for various infrastructure and application bootstrapping scenarios using Yandex Cloud platform 
 
 ## Contents
 Each subdirectory in this repository contains the configuration files for a specific scenario
