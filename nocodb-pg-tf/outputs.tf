@@ -20,12 +20,12 @@ output "nat_instance_public_ip" {
 }
 
 output "nginx_instance_private_ip" {
-   description = "Private IP of NAT instance and ssh bastion"
+   description = "Private IP of nginx web proxy"
    value       = yandex_compute_instance.proxy_docker_instance.network_interface.0.ip_address
 }
 
 output "nginx_instance_public_ip" {
-   description = "Public IP of NAT instance and ssh bastion"
+   description = "Public IP of nginx web proxy"
    value       = yandex_compute_instance.proxy_docker_instance.network_interface.0.nat_ip_address
 }
 
