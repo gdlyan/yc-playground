@@ -27,6 +27,7 @@ resource "yandex_compute_instance" "pg_docker_instances" {
 
   network_interface {
       subnet_id       = yandex_vpc_subnet.webapp_subnets[var.pg_docker_instances[count.index].subnet_ix].id
+      ip_address      = "10.130.0.101"
       # nat = true
   }  
 

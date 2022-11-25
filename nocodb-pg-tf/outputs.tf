@@ -28,9 +28,10 @@ output "nat_instance_public_ip" {
    value       = yandex_compute_instance.nat_instance_tf.network_interface.0.nat_ip_address
 }
 
-
-
+/*
 output "nlb_listener_address" {
    description = "Public IP of network load balancer"
    value       = [for s in yandex_lb_network_load_balancer.nlb.listener: s.external_address_spec.*.address].0[0]
 }
+*/
+

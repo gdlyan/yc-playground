@@ -18,14 +18,15 @@ resource "yandex_compute_instance" "nat_instance_tf" {
 
   boot_disk {
       initialize_params {
-          image_id = data.yandex_compute_image.nat_instance_ubuntu_image.id
+          image_id = data.yandex_compute_image.nat_instance_ubuntu_image.id          
           size = 10
       }
   }
 
   network_interface {
-      subnet_id = yandex_vpc_subnet.web_front_subnets.0.id
-      nat       = true
+      subnet_id  = yandex_vpc_subnet.web_front_subnets.0.id
+      ip_address = "10.129.0.100"
+      nat        = true
   }
 
   metadata = {
@@ -45,7 +46,7 @@ resource "yandex_compute_instance" "nat_instance_tf" {
 ## Copy ssh-keys to use this NAT instance as ssh bastion
 resource "null_resource" "copy_ssh_key" {
   depends_on = [yandex_compute_instance.nat_instance_tf]
-# Connection Block for Provisioners to connect to Azure VM Instance
+# Connection Block for Provisioners to connect to VM Instance
   connection {
     type = "ssh"
     host = yandex_compute_instance.nat_instance_tf.network_interface.0.nat_ip_address
@@ -64,5 +65,5 @@ resource "null_resource" "copy_ssh_key" {
       "sudo chmod 400 /home/${var.default_user}/.ssh/${var.private_key_file}"
     ]
   }
-}
 
+}

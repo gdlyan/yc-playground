@@ -70,3 +70,8 @@ variable "pg_docker_instances" {
  default = [{"subnet_ix" : 0}]
 }
 
+
+variable "domain" {
+  description = "domain name like example.com"
+  default = "example.com"
+} 
