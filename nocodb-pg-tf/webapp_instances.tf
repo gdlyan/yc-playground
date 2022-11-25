@@ -47,7 +47,7 @@ resource "yandex_compute_instance" "webapp_instances" {
           environment: 
             NC_AUTH_JWT_SECRET: "569a1821-0a93-45e8-87ab-eb857f20a010"
             NC_DB: "pg://${yandex_compute_instance.pg_docker_instances.0.network_interface.0.ip_address}:5432?u=${var.default_user}&p=${var.postgres_password}&d=${var.nocodb_database}" 
-          image: "nocodb/nocodb:latest"
+          image: "nocodb/nocodb:0.99.0"
           ports:
             - 80:8080
           restart: unless-stopped

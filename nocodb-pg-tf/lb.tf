@@ -4,7 +4,7 @@ resource "yandex_lb_network_load_balancer" "nlb" {
 
   listener {
     name = "nocodb-upstream-listener"
-    port = 10080
+    port = 80
     target_port = 80
     internal_address_spec {
       subnet_id  = yandex_vpc_subnet.web_front_subnets.0.id
