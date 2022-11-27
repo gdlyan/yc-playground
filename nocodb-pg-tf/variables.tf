@@ -73,7 +73,7 @@ variable "pg_docker_instances" {
 variable "pg_data_disk_size" {
  description = "max size of postgres database and pgadmin data disk"
  type = number
- default = 1
+ default = 20
 }
 
 

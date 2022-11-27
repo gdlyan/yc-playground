@@ -1,3 +1,14 @@
+data "template_file" "docker_compose_pg_yaml" {
+  template = file("${path.module}/docker-compose-pg.tpl.yaml")
+  vars = {
+    DEFAULT_USER             = var.default_user
+    POSTGRES_USER            = var.default_user
+    POSTGRES_PASSWORD        = var.postgres_password
+    PGADMIN_DEFAULT_EMAIL    = var.pgadmin_credentials.email
+    PGADMIN_DEFAULT_PASSWORD = var.pgadmin_credentials.password
+  }
+}
+
 resource "yandex_compute_instance" "pg_docker_instances" {
   count = length(var.pg_docker_instances)
   name = "pg-docker-instance-${count.index}"
@@ -27,6 +38,7 @@ resource "yandex_compute_instance" "pg_docker_instances" {
 
   secondary_disk {
     disk_id = "${yandex_compute_disk.pg_data_disk[count.index].id}"
+    device_name = "pgdata"
   }
 
   network_interface {
@@ -36,39 +48,7 @@ resource "yandex_compute_instance" "pg_docker_instances" {
   }  
 
   metadata = {
-    # docker-compose = file("${path.module}/docker-compose-pg.yaml")
-    docker-compose = <<-EOT
-        version: "3"
-
-        services:
-            postgres:
-                image: postgres:12.3-alpine
-                restart: always
-                environment:
-                    POSTGRES_PASSWORD: ${var.postgres_password}
-                    POSTGRES_USER: ${var.default_user}
-                ports:
-                    - 5432:5432
-                volumes:
-                    - pgdata:/var/lib/postgresql/data
-
-            pgadmin:
-                image: dpage/pgadmin4:4.23
-                environment:
-                    PGADMIN_DEFAULT_EMAIL: ${var.pgadmin_credentials.email}
-                    PGADMIN_DEFAULT_PASSWORD: ${var.pgadmin_credentials.password}
-                    PGADMIN_LISTEN_PORT: 80
-                ports:
-                    - 80:80
-                volumes:
-                    - pgadmin:/var/lib/pgadmin
-                depends_on:
-                    - postgres
-
-        volumes:
-            pgdata: {}
-            pgadmin: {}    
-        EOT
+    docker-compose = data.template_file.docker_compose_pg_yaml.rendered
     ssh-keys = "${var.default_user}:${file("~/.ssh/${var.private_key_file}.pub")}"
   }
 }
