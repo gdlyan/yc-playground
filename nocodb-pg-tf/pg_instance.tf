@@ -25,6 +25,10 @@ resource "yandex_compute_instance" "pg_docker_instances" {
       }
   }
 
+  secondary_disk {
+    disk_id = "${yandex_compute_disk.pg_data_disk[count.index].id}"
+  }
+
   network_interface {
       subnet_id       = yandex_vpc_subnet.webapp_subnets[var.pg_docker_instances[count.index].subnet_ix].id
       ip_address      = "10.130.0.101"

@@ -70,6 +70,12 @@ variable "pg_docker_instances" {
  default = [{"subnet_ix" : 0}]
 }
 
+variable "pg_data_disk_size" {
+ description = "max size of postgres database and pgadmin data disk"
+ type = number
+ default = 1
+}
+
 
 variable "domain" {
   description = "domain name like example.com"

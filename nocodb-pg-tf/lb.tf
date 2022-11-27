@@ -16,9 +16,10 @@ resource "yandex_lb_network_load_balancer" "nlb" {
     target_group_id = "${yandex_lb_target_group.tg.id}"
 
     healthcheck {
-      name = "tcp"
-      tcp_options {
+      name = "http"
+      http_options {
         port = 80
+        path = "/dashboard/"
       }
     }
   }
