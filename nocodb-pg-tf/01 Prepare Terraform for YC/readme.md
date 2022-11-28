@@ -1,4 +1,4 @@
-# Prepare Terraform to work with Yandex Cloud
+# 01 Prepare Terraform to work with Yandex Cloud
 In this tutorial we will get Terraform on our local machine and connect it to your Yandex Cloud
 ## Prerequisites 
 To complete this exercise, you will need:
