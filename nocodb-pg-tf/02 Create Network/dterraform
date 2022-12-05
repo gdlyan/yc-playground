@@ -1,0 +1,10 @@
+#!/bin/bash
+docker run  -it \
+            -w /opt \
+            -e TF_VAR_token="$(yc config get token)" \
+            -e TF_VAR_cloud_id="$(yc config get cloud-id)" \
+            -e TF_VAR_folder_id="$(yc config get folder-id)" \
+            -v "$(pwd)"/:/opt/ \
+            -v ~/.ssh:/root/.ssh \
+            -v "$(pwd)"/.terraformrc:/root/.terraformrc \
+            hashicorp/terraform:1.3.5 $@
