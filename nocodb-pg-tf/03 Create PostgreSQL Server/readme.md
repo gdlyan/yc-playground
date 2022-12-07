@@ -1,0 +1,16 @@
+# 03 Create PostgreSQL Server
+- `/dterraform apply --auto-approve --var recreate_data_disk="empty"`
+- `./dterraform state rm module.postgres.yandex_compute_disk.pg_data_disk[0]`
+- `./dterraform destroy --auto-approve`
+- `./dterraform apply --auto-approve`
+- `ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@<nat_instance_public_ip>`
+- browse to http://localhost:31080
+- Login and do something in pgadmin
+- `yc compute snapshot create --name pg-data-disk-snapshot --disk-name "pg-data-disk`
+- `./dterraform destroy --auto-approve`
+- `yc compute disk delete --name pg-data-disk`
+- `./dterraform apply --auto-approve --var recreate_data_disk="pg-data-disk-snapshot"`
+- `ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@<nat_instance_public_ip>`
+- browse to http://localhost:31080
+- `./dterraform destroy --auto-approve`
+- `yc compute snapshot delete --name pg-data-disk-snapshot` 
