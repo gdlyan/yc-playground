@@ -27,7 +27,7 @@ cp ../providers.tf .
 ## Step 3.2 Create a virtual disk for our PostgreSQL server to store its data
 In Yandex Cloud when we create a virtual machine we must specify at least one *boot disk* that will function like a disk drive in the computer. Normally, when you destroy the machine, the boot disk is destroyed as well. It is a bad idea to store the data on the boot disk that is not detachable. Doing so we set ourselves up to lose data permanently every time the virtual machine is destroyed.
 
-To prevent data loss we will create a persistent disk that we will attach to a Postgres virtual machine as a secondary disk that will be detachable. Once created, we will remove the disk from the list of the Terraform managed resources. Thus the disk will not be deleted on `./dterraform destroy` command. Next time we recreate the Postgres virtual machine the disk is attached again. It will only be possible to delete such a disk "manually" using ether Yandex Cloud web-interface or CLI.
+To prevent data loss we will create a persistent disk that we will attach to a Postgres virtual machine as a secondary disk that will be detachable. Once created, we will remove the disk from the list of the Terraform managed resources. Thus the disk will not be deleted on `./dterraform destroy` command. Next time we recreate the Postgres virtual machine the disk is attached again. It will only be possible to delete such a disk "manually" using either Yandex Cloud web-interface or CLI.
 ### Step 3.2.1 In the module directory create the `pg_data_disk.tf` file with the following content
 ```
 data "yandex_compute_disk" "pg_data_disk" {
@@ -104,7 +104,7 @@ module "postgres" {
 ```
 You remember that in the step 3.2.1 we promised to specify the subnet where our PostgreSQL Server will be created. This is what line `subnet = module.vpc_subnets.webapp_subnets[0]` is for.
 
-The line `recreate_data_disk = var.recreate_data_disk` simply passes the value of the variable from `./dterraform apply --var` argument to the `postgres` module.
+The line `recreate_data_disk = var.recreate_data_disk` simply passes the value of the variable from `./dterraform apply --var recreate_data_disk="{argument}"` argument to the `postgres` module.
 
 
 
@@ -122,7 +122,7 @@ Use client-trace-id for investigation of issues in cloud support
 If you are going to ask for help of cloud support, please send the following trace file: /home/{sanitised}/.config/yandex-cloud/logs/{sanitised}-yc_compute_disk_get.txt
 ```
 ### Step 3.2.8 Run `./dterraform apply --auto-approve --var recreate_data_disk="empty"`
-The command will return Terraform execution log and a message `Apply complete! Resources: 7 added, 0 changed, 0 destroyed.` followed by a list of outputs
+The command will stream Terraform execution ending up with a message `Apply complete! Resources: 7 added, 0 changed, 0 destroyed.` followed by a list of outputs
 
 ### Step 3.2.9 Run `./dterraform state list`
 Expected result:
@@ -138,19 +138,20 @@ module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[0]
 module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[1]
 module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[2]
 ```
+The first line shows that the disk is up and is managed by Terraform. But if we run  `./dterraform destroy` we will destroy the disk as well which is not what we want to happen. Next step is going to fix this.  
 ### Step 3.2.10 Run `./dterraform state rm module.postgres.yandex_compute_disk.pg_data_disk[0]`
-This command will remove our new disk from the list of Terraform managed resources. Expected outcoe:
+This command will remove our new disk from the list of Terraform managed resources. Expected outcome:
 ```
 Removed module.postgres.yandex_compute_disk.pg_data_disk[0]
 Successfully removed 1 resource instance(s).
 ```
-
 ### Step 3.2.10 Run `./dterraform destroy --auto-approve` 
 Expected outcome:
 ```
 Destroy complete! Resources: 7 destroyed.
 ```
-### Step 3.2.11 Check that our disk still exists in the cloud-folder `yc compute disk get --name pg-data-disk`
+Terraform has removed from the cloud all the resources that are on its state list and have no `.data.` in their definition. Our disk is no longer on the state list after the previous step. Therefore it should not be deleted.   
+### Step 3.2.11 Check that our disk still exists in the cloud/folder `yc compute disk get --name pg-data-disk`
 Expected outcome:
 ```
 id: {sanitised}
@@ -185,6 +186,86 @@ module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[2]
 We have created an empty unformatted and unpartitioned disk. We have made it persistent, yet it is not enough. What we truly require is a formatted, partitioned disk connected to a PostgreSQL server.
 
 This time, we will destroy everything of our infrastructure, including the disk. In the next steps, we will recreate the disk alongside the PostgreSQL Server virtual machine. 
+- Run `./dterraform destroy --auto-approve` to destroy everything but the disk
+- Run `yc compute disk delete --name pg-data-disk` to delete the disk from the cloud
+
+## Step 3.3 Copy ssh private key to NAT instance in order to enable access to virtual machines in the private network
+The virtual machine we will create in this session will be part of a private network and will not have a public IP address. We will be unable to directly ssh into this system from the outside. To enter the network, we will instead ssh into the NAT instance using its public IP address. Then, using the virtual machine's private IP address, we will ssh into it from the NAT instance, i.e. from within the network. This method is sometimes referred to as employing our NAT instance as a *bastion*.
+
+The public part of the ssh key will be uploaded on the Postgres virtual machine during its bootstrapping. We used the `ssh-key` argument of the `metadata` section to instruct this virtual machine to permit ssh access from devices that can supply the private part of the key. NAT instance will become such a device, hence we need to upload the private key into its `~/.ssh/` folder.
+
+### Step 3.3.1 Navigate to the `vpc-subnets` module diretory and edit the `nat_instance.tf` file
+Append the following lines in the bottom of the file:
+```
+## Copy ssh-keys to use this NAT instance as ssh bastion
+resource "null_resource" "copy_ssh_key" {
+  depends_on = [yandex_compute_instance.nat_instance_tf]
+# Connection Block for Provisioners to connect to VM Instance
+  connection {
+    type = "ssh"
+    host = yandex_compute_instance.nat_instance_tf.network_interface.0.nat_ip_address
+    user = var.default_user
+    private_key = file("~/.ssh/${var.private_key_file}")
+  }
+
+## File Provisioner: Copies the private key file to NAT instance
+  provisioner "file" {
+    source      = "~/.ssh/${var.private_key_file}"
+    destination = "/home/${var.default_user}/.ssh/${var.private_key_file}"
+  }
+## Remote Exec Provisioner: fix the private key permissions on NAT instance
+  provisioner "remote-exec" {
+    inline = [
+      "sudo chmod 400 /home/${var.default_user}/.ssh/${var.private_key_file}"
+    ]
+  }
+}
+``` 
+Here we use Terraform *provisioner*  blocks to copy files to and execute shell commands on the remote instance. 
+
+> When we write a Terraform script, we are effectively specifying a list of Terraform managed *resources*. Each class of resources has a *provider*, which is a program that tells Terraform what it can do with the resources of this class. Most commonly, providers tell Terraform to manage (i.e. to create or delete) some specific piece of infrastructure in the cloud, such as a network, subnet, route table, compute instance etc. But this is not the only use case for resources.
+> Sometimes we presume that there is some infrastructure in the cloud that we don't want to create or delete. Still we want to read its properties in order to manage the infratructure included in the Terraform scope. Remember our persistent data disk example: when setting `recreate_data_disk` to "none" we assert that a disk named `pg-data-disk` exists in our cloud/folder, and we want to use its properties, particularly `disk_id` property, to attach the disk to a Terraform managed PostgreSQL virtual machine. We use a special kind of resource called *data source* to access properties of the infratructure external to our Terraform scope.
+> Finally, sometimes we need to perform some operation that has nothing to do with creation or deletion of the infrastructure, neither with reading its properties. The frequent use case is when we want to run some command locally or remotely. This is when *null_resource* with *provisioner* blocks comes handy.  
+
+### Step 3.3.2  In the `vpc-subnets` module diretory edit the `providers.tf`
+Add the `null` provider and make the entire ile look as follows:
+```
+terraform {
+  required_providers {
+    yandex = {
+      source = "yandex-cloud/yandex"
+    }  
+    template = {
+      source = "hashicorp/template"
+      version = ">= 2.2.0"
+    }  
+    null = {
+      source = "hashicorp/null"
+      version = ">= 3.0"
+    }           
+  }
+  required_version = ">= 0.13"
+}
+```   
+### Step 3.3.3 Navigate back to the project directory `cd ..` and run `./dterraform init`
+This will install the `null` provider that we have specifed in the previous step
+
+### Step 3.3.4 Run `./dterraform apply --auto-approve --var recreate_data_disk="empty"`
+The command again will stream Terraform execution ending up with a message `Apply complete! Resources: 9 added, 0 changed, 0 destroyed.` followed by a list of outputs
+
+### Step 3.3.5 Ssh into *nat_instance_public_ip* and explore the content of `~/.ssh` folder
+`ssh -i ~/.ssh/tutorial_id_rsa tutorial@{insert the value of nat_instance_public_ip output}` 
+Respond 'yes' to a "Are you sure you want to continue connecting (yes/no/\[fingerprint\])?" question.
+
+Run `ls ~/.ssh`
+
+There should be a `tutorial_id_rsa` file in the folder:
+```
+authorized_keys  tutorial_id_rsa
+```
+Finally run `Enter` followed by `~` and `.` to close the ssh connection.
+
+### Step 3.3.6 Destroy the infrastructure including the disk
 - Run `./dterraform destroy --auto-approve` to destroy everything but the disk
 - Run `yc compute disk delete --name pg-data-disk` to delete the disk from the cloud
 

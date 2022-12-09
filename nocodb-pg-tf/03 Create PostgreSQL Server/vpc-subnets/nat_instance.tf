@@ -57,5 +57,4 @@ resource "null_resource" "copy_ssh_key" {
       "sudo chmod 400 /home/${var.default_user}/.ssh/${var.private_key_file}"
     ]
   }
-
 }
