@@ -224,8 +224,10 @@ resource "null_resource" "copy_ssh_key" {
 Here we use Terraform *provisioner*  blocks to copy files to and execute shell commands on the remote instance. 
 
 > When we write a Terraform script, we are effectively specifying a list of Terraform managed *resources*. Each class of resources has a *provider*, which is a program that tells Terraform what it can do with the resources of this class. Most commonly, providers tell Terraform to manage (i.e. to create or delete) some specific piece of infrastructure in the cloud, such as a network, subnet, route table, compute instance etc. But this is not the only use case for resources.
+> 
 > Sometimes we presume that there is some infrastructure in the cloud that we don't want to create or delete. Still we want to read its properties in order to manage the infratructure included in the Terraform scope. Remember our persistent data disk example: when setting `recreate_data_disk` to "none" we assert that a disk named `pg-data-disk` exists in our cloud/folder, and we want to use its properties, particularly `disk_id` property, to attach the disk to a Terraform managed PostgreSQL virtual machine. We use a special kind of resource called *data source* to access properties of the infratructure external to our Terraform scope.
-> Finally, sometimes we need to perform some operation that has nothing to do with creation or deletion of the infrastructure, neither with reading its properties. The frequent use case is when we want to run some command locally or remotely. This is when *null_resource* with *provisioner* blocks comes handy.  
+> 
+> Finally, sometimes we need to perform some operation that has nothing to do with creation or deletion of the infrastructure, neither with reading its properties. The frequent use case is when we want to run some command locally or remotely. This is when *null_resource* with *provisioner* blocks comes in handy.  
 
 ### Step 3.3.2  In the `vpc-subnets` module diretory edit the `providers.tf`
 Add the `null` provider and make the entire ile look as follows:
@@ -268,6 +270,181 @@ Finally run `Enter` followed by `~` and `.` to close the ssh connection.
 ### Step 3.3.6 Destroy the infrastructure including the disk
 - Run `./dterraform destroy --auto-approve` to destroy everything but the disk
 - Run `yc compute disk delete --name pg-data-disk` to delete the disk from the cloud
+
+## Step 3.4 Create the virtual machine for the PostrgeSQL server and attach the persistent disk to the same
+We will use Yandex Container Optimized Image for our virtual machine as long as we want to run PostgreSQL Server in the container. 
+> Normally, if we want to attain more scalability, we would use Yandex Cloud's Managed Postgres service. The premise behind a managed service with any public cloud provider is that the cloud provider handles database availability and security while the client focuses on application development rather than database administration. This unquestionably adds value, but it is not free. 
+> 
+> Our toy scenario is small and does not set high availability requiremens. We only need a dead simple basic configuration, and we want to learn what this basic configuration would look like from the database administration standpoint, so there is no need to ask the cloud provider to do this job for us.       
+### Step 3.4.1 Create a *docker-compose* template 
+Navigate to the `postgres` module 
+```
+cd postgres
+```
+and create the file `docker-compose-pg.tpl.yaml` with the following content:
+```
+version: "3"
+
+services:
+    postgres:
+        image: postgres:12.3-alpine
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_USER: ${POSTGRES_USER}
+        ports:
+            - 5432:5432
+        volumes:
+            - /home/${DEFAULT_USER}/data-disk/pgdata:/var/lib/postgresql/data
+
+    pgadmin:
+        image: dpage/pgadmin4:4.23
+        user: root
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+            PGADMIN_LISTEN_PORT: 80
+            PGADMIN_CONFIG_SERVER_MODE: 'True'
+        ports:
+            - 80:80
+        volumes:
+            - /home/${DEFAULT_USER}/data-disk/pgadmin:/var/lib/pgadmin
+        depends_on:
+            - postgres
+        
+x-yc-disks:
+  - device_name: pgdata
+    fs_type: ext4
+    host_path: /home/${DEFAULT_USER}/data-disk
+```
+This compose file tells Yandex Cloud to run `postgres` and `pgadmin` containers on the same virtual machine. Docker will automatically create a network and attache these two containers to it. This will allow `pgadmin` to connect to `postgres` using the container name (which is `postgres`, too).  
+
+The expression wrapped in curly brackets pereceded with '$' symbol are the Postgres and pgAdmin credentials. They will be replaced with the values of the corresponding variables declared in the Postgres virtual machine's Terraform configuration that we define in the next step. 
+
+The PostgreSQL data and the pgAdmin configuration directories will be mapped to an external virtual disk `pgdata` that will be mounted to a `data-disk` directory in the home directory of the default user. This virtual disk will be exactly the persistent `pg-data-disk` that we create in the [step 3.2](). The device-name for this name will be set to 'pgdata' when the disk is attached to the virtual machine, we will do this in the following step, too.
+### Step 3.4.2 create `pg_instance.tf` with the following content:
+```
+data "template_file" "docker_compose_pg_yaml" {
+  template = file("${path.module}/docker-compose-pg.tpl.yaml")
+  vars = {
+    DEFAULT_USER             = var.default_user
+    POSTGRES_USER            = var.default_user
+    POSTGRES_PASSWORD        = var.postgres_password
+    PGADMIN_DEFAULT_EMAIL    = var.pgadmin_credentials.email
+    PGADMIN_DEFAULT_PASSWORD = var.pgadmin_credentials.password
+  }
+}
+
+resource "yandex_compute_instance" "pg_docker_instances" {
+  count = length(var.pg_docker_instances)
+  name = "pg-docker-instance-${count.index}"
+  zone = "${yandex_vpc_subnet.webapp_subnets[var.pg_docker_instances[count.index].subnet_ix].zone}"
+
+
+  labels = { 
+    ansible_group = "pg_docker_instance"
+  }
+
+  resources {
+      cores  = 2
+      core_fraction = 20
+      memory = 1
+  }
+
+  scheduling_policy {
+      preemptible  = true
+  }
+
+  boot_disk {
+      initialize_params {
+          image_id = data.yandex_compute_image.container_optimized_image.id
+          size = 30
+      }
+  }
+
+  secondary_disk {
+    disk_id = "${yandex_compute_disk.pg_data_disk[count.index].id}"
+    device_name = "pgdata"
+  }
+
+  network_interface {
+      subnet_id       = yandex_vpc_subnet.webapp_subnets[var.pg_docker_instances[count.index].subnet_ix].id
+      ip_address      = "10.130.0.101"
+      # nat = true
+  }  
+
+  metadata = {
+    docker-compose = data.template_file.docker_compose_pg_yaml.rendered
+    ssh-keys = "${var.default_user}:${file("~/.ssh/${var.private_key_file}.pub")}"
+  }
+}
+```
+### Step 3.4.3 Append the following lines in the bottom of `/postgres/variables.tf`
+variable "postgres_password" {
+  description = "Postgres password for default_user"
+  type        = string  
+}
+
+variable "pgadmin_credentials" {
+  type        =  object({email = string, password = string})  
+}
+
+variable "pg_private_ip_address" {
+    type = string
+    default = "10.130.0.101"
+}
+### Step 3.4.4 Also append the following lines in the bottom of `/postgres/variables.tf`
+variable "postgres_password" {
+  description = "Postgres password for default_user"
+  type        = string  
+}
+
+variable "pgadmin_credentials" {
+  type        =  object({email = string, password = string})  
+}
+### Step 3.4.5 Navigate to the root module folder and append the same lines to `variables.tf`
+variable "postgres_password" {
+  description = "Postgres password for default_user"
+  type        = string  
+}
+
+variable "pgadmin_credentials" {
+  type        =  object({email = string, password = string})  
+}
+
+### Step 3.4.6 In the root module folder create `terraform.tfvars` file and set your Postgres and pgAdmin credentials
+```
+postgres_password   = "<postgres password for a default user 'tutorial'>"
+pgadmin_credentials = {email: "me@example.com", password: "put_your_strong_password_here"}
+```
+
+### Step 3.4.7 In the `main.tf` add the `postgres_password` and `pgadmin_credentials` as the arguments to module `postgres` call
+The `main.tf` file should look like as follows after the edit:
+```
+provider "yandex" {
+  token     = var.token
+  cloud_id  = var.cloud_id
+  folder_id = var.folder_id
+}
+
+module "vpc_subnets" {
+  source = "./vpc-subnets" 
+}
+
+module "postgres" {
+  source = "./postgres" 
+  subnet = module.vpc_subnets.webapp_subnets[0]
+  postgres_password = var.postgres_password
+  pgadmin_credentials = var.pgadmin_credentials
+  recreate_data_disk = var.recreate_data_disk
+}
+```  
+
+Note these two lines added in the `module "postgres"` block:
+```
+  pgadmin_credentials = var.pgadmin_credentials
+  recreate_data_disk = var.recreate_data_disk
+```
 
 ### DRAFT PART 
 
