@@ -51,20 +51,22 @@ resource "yandex_compute_disk" "pg_data_disk" {
 ```
 If the value passed to the module with the variable `var.recreate_data_disk` is equal to *"none"* (which is a default value) then Terraform will look your cloud/folder for a compute disk named "pg-data-disk" and import the same into Terraform state. 
 > Passing "empty" as the value for `var.recreate_data_disk` is the assertion that there is a disk named *"pg-data-disk"* in the folder
+> 
 > Be careful: Terraform will shoot an error if there is no disk with such a name in your folder
 
 If the value of `var.recreate_data_disk` is *"empty"* then Terraform will create a new empty unpartitioned unformatted disk. 
 > Passing "empty" as the value for `var.recreate_data_disk` is the assertion that there is no disk named *"pg-data-disk"* in the folder 
-> Note that if `var.recreate_data_disk` is not equal to *"none"* and  there is already a disk named "pg-data-disk" in the folder then Terraform will through an error.
+> 
+> Note that if `var.recreate_data_disk` is not equal to *"none"* and  there is already a disk named "pg-data-disk" in the folder then Terraform will throw an error.
 
 If the value of `var.recreate data disk` is anything other than *"empty"* or *"none"*, Terraform will create a disk from a snapshot named the same as the value of this variable."
-> Note that passing anything other than *"none"* or to *"empty"* to `var.recreate_data_disk` asserts that there is a disk snapshot object in the YC folder that matches the variable value. If there is no such a snapshot object then Terraform will throw an error   
+> Note that passing anything other than *"none"* or to *"empty"* to `var.recreate_data_disk` asserts that there is a disk snapshot object in the Yandex Cloud folder that matches the variable value. If there is no such a snapshot object then Terraform will throw an error, too   
 
 In the meantime, we want to set the disk size to 20GB, make it the default size, but still let it be changed. We introduce a variable `var.pg_data_disk_size` for this purpose. 
 
 Finally we need to specify the availability zone where we create the disk in. It should be the same as the virtual machine's one. Yandex cloud will not create a virtual machine with a disk from a different availability zone. In one of the next steps we will specify the subnet where our PostgreSQL Server will be created. For a disk we will take the availability zone from this subnet, too. The line `zone = var.subnet.zone` is doing that  
   
-### Step 3.2.2 In the *module* directory create the `variables.tf` file with the following content
+### Step 3.2.2 In the `postgres` *module* directory create the `postgres/variables.tf` file with the following content
 ```
 variable "subnet" {
   type = object({id = string, zone = string, v4_cidr_blocks = list(string)})
@@ -84,7 +86,7 @@ variable "recreate_data_disk" {
 ```
 This is a declaration of the two new variables used in `pg_data_disk.tf` as well as setting  "none" as a default value for `recreate_data_disk` variable.
 
-### Step 3.2.3 Edit `variables.tf` in the *project* directory
+### Step 3.2.3 Edit `variables.tf` in the *root module* directory
 Append the `recreate_data_disk"` variable declaration in the bottom of the file
 ```
 variable "recreate_data_disk" {
@@ -93,7 +95,7 @@ variable "recreate_data_disk" {
  default     = "none"
 ```   
 We are planning to set different values to this variable on Terraform runs. When we explicitly specify the variable value it is sent to the root module which calls the 'postgres' module with the variable passed along as an argument. Thus, a variable needs to be declared in the root module, too.
-### Step 3.2.4 Edit `main.tf` in the *project* directory
+### Step 3.2.4 Edit `main.tf` in the *root module* directory
 Append the following lines in the bottom of a file:
 ```
 module "postgres" {
@@ -108,7 +110,7 @@ The line `recreate_data_disk = var.recreate_data_disk` simply passes the value o
 
 
 
-### Step 3.2.5 Navigate to the project directory and run `./dterraform init` to install the `postgres` module
+### Step 3.2.5 Navigate to the *root module* directory and run `./dterraform init` to install the `postgres` module
 ### Step 3.2.6 Run `./dterraform validate` to check for syntax errors
 ### Step 3.2.7 Run `yc compute disk get --name pg-data-disk` to check if you already have the disk named *pg-data-disk*
 Expeced outcome:
@@ -225,9 +227,9 @@ Here we use Terraform *provisioner*  blocks to copy files to and execute shell c
 
 > When we write a Terraform script, we are effectively specifying a list of Terraform managed *resources*. Each class of resources has a *provider*, which is a program that tells Terraform what it can do with the resources of this class. Most commonly, providers tell Terraform to manage (i.e. to create or delete) some specific piece of infrastructure in the cloud, such as a network, subnet, route table, compute instance etc. But this is not the only use case for resources.
 > 
-> Sometimes we presume that there is some infrastructure in the cloud that we don't want to create or delete. Still we want to read its properties in order to manage the infratructure included in the Terraform scope. Remember our persistent data disk example: when setting `recreate_data_disk` to "none" we assert that a disk named `pg-data-disk` exists in our cloud/folder, and we want to use its properties, particularly `disk_id` property, to attach the disk to a Terraform managed PostgreSQL virtual machine. We use a special kind of resource called *data source* to access properties of the infratructure external to our Terraform scope.
+> Sometimes we presume that there is some infrastructure in the cloud that we don't want to create or delete. Still we want to read its properties in order to manage the dependent infrastructure included in the Terraform scope. Remember our persistent data disk example: when setting `recreate_data_disk` to "none" we assert that a disk named `pg-data-disk` exists in our cloud/folder, and we want to use its properties, particularly `disk_id` property, to attach the disk to a Terraform managed PostgreSQL virtual machine. We use a special kind of resource called *data source* to access properties of the infratructure external to our Terraform scope.
 > 
-> Finally, sometimes we need to perform some operation that has nothing to do with creation or deletion of the infrastructure, neither with reading its properties. The frequent use case is when we want to run some command locally or remotely. This is when *null_resource* with *provisioner* blocks comes in handy.  
+> Finally, sometimes we need to perform some operation that has nothing to do with creation or deletion of the infrastructure, neither with reading its properties. The frequent use case is when we want to run some command locally or remotely on the newly provisioned or existing machine. This is when *null_resource* with *provisioner* blocks comes in handy.  
 
 ### Step 3.3.2  In the `vpc-subnets` module diretory edit the `providers.tf`
 Add the `null` provider and make the entire ile look as follows:
@@ -265,7 +267,7 @@ There should be a `tutorial_id_rsa` file in the folder:
 ```
 authorized_keys  tutorial_id_rsa
 ```
-Finally run `Enter` followed by `~` and `.` to close the ssh connection.
+Finally press `Enter` followed by `~` and `.` to close the ssh connection.
 
 ### Step 3.3.6 Destroy the infrastructure including the disk
 - Run `./dterraform destroy --auto-approve` to destroy everything but the disk
@@ -317,11 +319,15 @@ x-yc-disks:
     fs_type: ext4
     host_path: /home/${DEFAULT_USER}/data-disk
 ```
-This compose file tells Yandex Cloud to run `postgres` and `pgadmin` containers on the same virtual machine. Docker will automatically create a network and attache these two containers to it. This will allow `pgadmin` to connect to `postgres` using the container name (which is `postgres`, too).  
+This compose file tells Yandex Cloud to run `postgres` and `pgadmin` containers on the same virtual machine. Docker will automatically create a network and attach these two containers to it. This will allow `pgadmin` to connect to `postgres` using the container name (which is `postgres`, too).  
 
-The expression wrapped in curly brackets pereceded with '$' symbol are the Postgres and pgAdmin credentials. They will be replaced with the values of the corresponding variables declared in the Postgres virtual machine's Terraform configuration that we define in the next step. 
+The `postgres` container will listen on port 5432, while the `pgadmin` container will listen on port 80.
+
+The expression wrapped in curly brackets pereceded with '$' symbol are the Postgres and pgAdmin credentials. They will be replaced with the values of the corresponding variables declared in the Postgres virtual machine's Terraform configuration that we define in the  steps . 
 
 The PostgreSQL data and the pgAdmin configuration directories will be mapped to an external virtual disk `pgdata` that will be mounted to a `data-disk` directory in the home directory of the default user. This virtual disk will be exactly the persistent `pg-data-disk` that we create in the [step 3.2](). The device-name for this name will be set to 'pgdata' when the disk is attached to the virtual machine, we will do this in the following step, too.
+
+The nice thing about container optimized image is that if the device comes across the unpartitioned unformatted secondary disk then partitioning and formatting will be done out of the box. So we don't need to worry about it any further than specifying `fs_type: ext4` in the `x-yc-disks` block of the docker-compose manifest. 
 ### Step 3.4.2 create `pg_instance.tf` with the following content:
 ```
 data "template_file" "docker_compose_pg_yaml" {
@@ -335,15 +341,13 @@ data "template_file" "docker_compose_pg_yaml" {
   }
 }
 
-resource "yandex_compute_instance" "pg_docker_instances" {
-  count = length(var.pg_docker_instances)
-  name = "pg-docker-instance-${count.index}"
-  zone = "${yandex_vpc_subnet.webapp_subnets[var.pg_docker_instances[count.index].subnet_ix].zone}"
+data "yandex_compute_image" "container_optimized_image" {
+  family = "container-optimized-image"
+}
 
-
-  labels = { 
-    ansible_group = "pg_docker_instance"
-  }
+resource "yandex_compute_instance" "pg_docker_instance" {
+  name = "pg-docker-instance"
+  zone = var.subnet.zone
 
   resources {
       cores  = 2
@@ -363,14 +367,13 @@ resource "yandex_compute_instance" "pg_docker_instances" {
   }
 
   secondary_disk {
-    disk_id = "${yandex_compute_disk.pg_data_disk[count.index].id}"
+    disk_id = var.recreate_data_disk == "none" ? data.yandex_compute_disk.pg_data_disk.0.id : yandex_compute_disk.pg_data_disk.0.id
     device_name = "pgdata"
   }
 
   network_interface {
-      subnet_id       = yandex_vpc_subnet.webapp_subnets[var.pg_docker_instances[count.index].subnet_ix].id
-      ip_address      = "10.130.0.101"
-      # nat = true
+      subnet_id       = var.subnet.id
+      ip_address      = cidrhost(var.subnet.v4_cidr_blocks[0], 101)
   }  
 
   metadata = {
@@ -379,7 +382,30 @@ resource "yandex_compute_instance" "pg_docker_instances" {
   }
 }
 ```
-### Step 3.4.3 Append the following lines in the bottom of `/postgres/variables.tf`
+This is the part of the configuration that tells Yandex Cloud to spawn the virtual machine based on the Container Optimized Image with the following  special features worth attention:
+- Attach either existing or recreated data disk as a secondary disk, depending on the value of the `recreate_data_disk` variable received as an argument. Note that the device_name `pgdata` is given to a disk at this stage. Remember that we are identifying this disk by its device name (see `device-name: pgdata`)  in the `docker-compose-pg.tpl.yaml` in the  `x-yc-disks` section
+- Launch `postgres` and `pgadmin` containers according to a *docker-compose* manifest that is generated from the `docker-compose-pg.tpl.yaml` template by substitution of the variables in the curly brackets with the values passed in the `vars` block of the `template_file.docker_compose_pg_yaml` resource confguration.
+- We will also set a static private IP address to our PostgreSQL instance. Otherwise it would be assigned dynamically every time we recreate the instance. So we will have to ssh into the new IP address after recreation and we have to look into the Terraform outputs for this address. This might be less convenient than just remembering one address and always using it.
+  > We have to ensure that the private IP address would match the `v4_cidr_blocks` mask of the subnet. Our convention would be that the first three 8-bit numbers of the IP address would come from the subnet's CIDR while the last number in the IP address would always be `101` for the PostgreSQL Server in our setup. There is a special `cidrhost` function in Terraform that implements such a trick. 
+  > 
+  > In the step 3.4.8 we pass the private subnet that we have created in the availability zone `ru-central1-a` as a `subnet` argument of the module `postgres` call. We do this in the line `subnet = module.vpc_subnets.webapp_subnets[0]` of the `module "postgres"` block. The `v4_cidr_blocks` of this subnet is `["10.130.0.0/24"]`. Our `cidrhost(var.subnet.v4_cidr_blocks[0], 101)` call will return `"10.130.0.101"` in this case.
+### Step 3.4.3 Append the following lines in the bottom of `postgres/variables.tf`
+```
+variable "default_user" {
+  type        = string
+  default     = "tutorial"
+}
+
+variable "private_key_file" {
+  type        = string
+  default     = "tutorial_id_rsa"
+}
+
+```
+The `default_user` and `private_key_file` variables are used in the `metadata` block of the `yandex_compute_instance.pg_docker_instance` resource configuration. The purpose of these variables is to allow ssh-connection to the PostgreSQL server instance with the username and the private key specified in these variables (which by default are `tutorial` and `tutorial_id_rsa`). Also the value of the `default_user` variable would be sent to the `docker-compose-pg.tpl.yaml` template, so that the `POSTGRES_USER` on the PostgreSQL Server would be set to `tutorial` unless we explicitly set some other value to the `default_user` variable, which we don't do in this exercise.
+
+### Step 3.4.4 Also append the following lines in the bottom of `postgres/variables.tf`
+```
 variable "postgres_password" {
   description = "Postgres password for default_user"
   type        = string  
@@ -388,12 +414,33 @@ variable "postgres_password" {
 variable "pgadmin_credentials" {
   type        =  object({email = string, password = string})  
 }
-
-variable "pg_private_ip_address" {
-    type = string
-    default = "10.130.0.101"
+```
+The values of these variables come from the root module as the arguments, then are sent to the `docker-compose-pg.tpl.yaml` template  .
+### Step 3.4.5 For the `postgres` module create the outputs file  `postgres/outputs.tf` with the following content: 
+```
+output "pg_instance_private_ip" {
+   description = "Private IP of virtual machine with postgres and pgadmin"
+   value       = yandex_compute_instance.pg_docker_instance.network_interface.0.ip_address
 }
-### Step 3.4.4 Also append the following lines in the bottom of `/postgres/variables.tf`
+
+output "pg_data_disk_id" {
+   description = "Persistent data volume for postgres"
+   value       = yandex_compute_instance.pg_docker_instance.secondary_disk[0].disk_id
+}
+```
+
+### Step 3.4.6 Navigate to the root module directory and append the same lines to `variables.tf` as you did for `postgres/variables.tf`
+```
+variable "default_user" {
+  type        = string
+  default     = "tutorial"
+}
+
+variable "private_key_file" {
+  type        = string
+  default     = "tutorial_id_rsa"
+}
+
 variable "postgres_password" {
   description = "Postgres password for default_user"
   type        = string  
@@ -402,23 +449,15 @@ variable "postgres_password" {
 variable "pgadmin_credentials" {
   type        =  object({email = string, password = string})  
 }
-### Step 3.4.5 Navigate to the root module folder and append the same lines to `variables.tf`
-variable "postgres_password" {
-  description = "Postgres password for default_user"
-  type        = string  
-}
+```
 
-variable "pgadmin_credentials" {
-  type        =  object({email = string, password = string})  
-}
-
-### Step 3.4.6 In the root module folder create `terraform.tfvars` file and set your Postgres and pgAdmin credentials
+### Step 3.4.7 In the root module directory create `terraform.tfvars` file and set your Postgres and pgAdmin credentials
 ```
 postgres_password   = "<postgres password for a default user 'tutorial'>"
 pgadmin_credentials = {email: "me@example.com", password: "put_your_strong_password_here"}
 ```
 
-### Step 3.4.7 In the `main.tf` add the `postgres_password` and `pgadmin_credentials` as the arguments to module `postgres` call
+### Step 3.4.8 In the `main.tf` add the `postgres_password` and `pgadmin_credentials` as the arguments to module `postgres` call
 The `main.tf` file should look like as follows after the edit:
 ```
 provider "yandex" {
@@ -445,45 +484,118 @@ Note these two lines added in the `module "postgres"` block:
   pgadmin_credentials = var.pgadmin_credentials
   recreate_data_disk = var.recreate_data_disk
 ```
-
-### DRAFT PART 
-
-
-### Step 3.2.3 In the *module* directory create the `outputs.tf` file with the following content
-```
-output "pg_data_disk_id" {
-   description = "Persistent data volume for postgres"
-   value       = yandex_compute_instance.pg_docker_instance.secondary_disk[0].disk_id
-}
-```
-
-### Step 3.2.6 Edit `outputs.tf` in the *project* directory
-Append the following lines in the bottom of a file:
+### Step 3.4.9 Update the `outputs.tf` file in the root module directory
 ```
 output "pg_data_disk_id" {
    value = module.postgres.pg_data_disk_id
 }
+
+output "ssh_command" {
+   value = "ssh -L 31080:${module.postgres.pg_instance_private_ip}:80 -i ~/.ssh/${var.private_key_file}  ${var.default_user}@${module.vpc_subnets.nat_instance_public_ip}"
+}
 ```
+The last output is interesting: it will print out the ssh command that we would use to be able to access pgAdmin web-interface from the outside of the private network
+### Step 3.4.10 In the root module directory run `./dterraform apply --auto-approve --var recreate_data_disk="empty"`
+The outcome should be as follows:
+```
+Apply complete! Resources: 10 added, 0 changed, 0 destroyed.
 
+Outputs:
 
-## Step 3.2 Copy ssh private key to NAT instance in order to enable access to virtual machines in the private network
-The virtual machine we will create in this session will be part of a private network and will not have a public IP address. As a result, we will be unable to immediately ssh into this system from the outside. To enter the network, we will instead ssh into the NAT instance using its public IP address. Then, using the virtual machine's private IP address, we will ssh into it from the NAT instance, i.e. from within the network. This method is sometimes referred to as employing our NAT instance as a *bastion*.
+nat_instance_private_ip = "10.129.0.100"
+nat_instance_public_ip = {sanitized}
+network_id = {sanitized}
+pg_data_disk_id = {sanitized}
+ssh_command = "ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@{sanitized}"
+webfront_subnet = {sanitized}
+```  
+### Step 3.4.11 Run the command from `ssh_command` output
+In the example below:
+```
+ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@{sanitized}
+```
+This command pretty much gives you an access to the NAT instance shell. But there is one extra argument -L in the command  that tells the tunnel to forward all the requests on port localhost:31080 to the port 80 on the private IP address of PostgreSQL server. And this is exactly where pgAdmin is listening
+### Step 3.4.12 Now in your browser go to `localhost:31080`  
+You will get to the pgAdmin login page
 
-The public part of the ssh key will be uploaded on the Postgres virtual machine during its bootstrapping. We used the `ssh-key` argument of the `metadata` section to instruct this virtual machine to permit ssh access from devices that can supply the private part of the key. NAT instance will become such a device, hence we need to upload the private key into its `~/.ssh/` folder.     
-### Step  
-     
-- `/dterraform apply --auto-approve --var recreate_data_disk="empty"`
-- `./dterraform state rm module.postgres.yandex_compute_disk.pg_data_disk[0]`
-- `./dterraform destroy --auto-approve`
-- `./dterraform apply --auto-approve`
-- `ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@<nat_instance_public_ip>`
-- browse to http://localhost:31080
-- Login and do something in pgadmin
-- `yc compute snapshot create --name pg-data-disk-snapshot --disk-name "pg-data-disk`
-- `./dterraform destroy --auto-approve`
-- `yc compute disk delete --name pg-data-disk`
-- `./dterraform apply --auto-approve --var recreate_data_disk="pg-data-disk-snapshot"`
-- `ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@<nat_instance_public_ip>`
-- browse to http://localhost:31080
-- `./dterraform destroy --auto-approve`
-- `yc compute snapshot delete --name pg-data-disk-snapshot` 
+Enter the credentials that you have put in the step 3.4.7 into `pgadmin_credentials` variable. This will bring you to main pgAdmin interface
+> If you are working from the Yandex Cloud Toolbox machine, you have no browser there. You can instead install the `tutorial_id_rsa` provate key into ~/.ssh folder on your local machine that does have a browser and run the same command locally
+### Step 3.4.13 Connect to PostgreSQL Server with pgAdmin
+- In the *"Browser"* pane on the left hand side click on the  "Servers" tree element. It's not going to expand since we have not yet created a connection
+- In the top menu select *Object -> Create -> Server...*. The server connection form will pop up
+- In the *"General"* tab of the server connection form in the *"Name"* edit box type in `postgres` and switch to the *"Connection"* tab
+- In the *"Host name / address"* edit box type in `postgres`
+- Keep `5432` in the *"Port"* and `postgres` in `Maintenance database` edit boxes 
+- In the *"Username"* edit box type in `tutorial` as long as it is what you specified in the `default_user` variable that has been further passed to the `${POSTGRES_USER}` variable of the docker-compose template
+- In the *"Password"* edit box enter the password that you have assigned at the step 3.4.7 to the `postgres_password` variable  
+- Check *"Save the password"* box and click *"Save*" button in the bottom of the form
+
+Now the tree in the *"Browser"* pane on the left hand side is expandable. Play around with pgAdmin and explore what you have on the server out of the box.
+### Step 3.4.14 Remove the data disk from the list of Terraform managed resources to make it persistent
+Every time we recreate the disk from Terraform using `--var recreate_data_disk="empty"` or `--var recreate_data_disk="pg-data-disk-snapshot"` the disk gets back to the Terraform state. We have to remove it from there, otherwise it is going to be destroyed next time we recreate the infrastructure  
+```
+`./dterraform state rm module.postgres.yandex_compute_disk.pg_data_disk[0]`
+```
+### Step 3.4.15 Destroy and apply Terraform again without disk recreation
+```
+./dterraform destroy --auto-approve
+```
+Expected result:
+```
+./dterraform destroy --auto-approve
+```
+Then 
+```
+./dterraform apply --auto-approve
+```
+Expected result:
+```
+Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+nat_instance_private_ip = "10.129.0.100"
+nat_instance_public_ip = {sanitized}
+network_id = {sanitized}
+pg_data_disk_id = {sanitized but same as of the step 3.4.10}
+ssh_command = "ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@{sanitized}"
+webfront_subnet = {sanitized}
+```
+### Step 3.4.16 Check that your data has not gone away
+Run the ssh command from the Terraform output
+```
+ssh_command = "ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@{sanitized}"
+``` 
+In your browser go to `localhost:31080` and check that your pgAdmin connection is still there
+
+### Step 3.4.17 SSH from you NAT instance into PostgreSQL
+The previous ssh command `ssh_command = "ssh -L 31080:10.130.0.101:80 -i ~/.ssh/tutorial_id_rsa  tutorial@{sanitized}"` should have connected you to an NAT instance. Now from this shell run:
+```
+ssh -i ~/.ssh/tutorial_id_rsa tutorial@10.130.0.101
+``` 
+This should give you access to the PostgreSQL Server
+
+### Step 3.4.18 Explore the PostgreSQL virtual machine
+Run the following commands:
+- `docker ps` to get the list of running containers
+- `docker logs <container id>` to review the container logs
+- `sudo tail -n 25 /var/log/syslog` to review the host system log (last 25 rows). This command is also helpful when something is going wrong and containers don't start. Syslog is the first instance to get information about the possible failures
+
+Click `ENTER` followed by `~` and `.` to exit ssh connection
+
+## Step 3.5 Experiment with data disk snapshots
+### Step 3.5.1 Create a data disk snapshot
+```
+yc compute snapshot create --name pg-data-disk-snapshot --disk-name "pg-data-disk
+```
+### Step 3.5.2 Restore from disk snapshot
+- `./dterraform destroy --auto-approve` to destroy everything but the data disk
+- `yc compute disk delete --name pg-data-disk` to remove the data disk
+- `./dterraform apply --auto-approve --var recreate_data_disk="pg-data-disk-snapshot"` to restore from the snapshot
+- `./dterraform state rm module.postgres.yandex_compute_disk.pg_data_disk[0]` to remove the restored disk from the list of Terraform managed resources
+### Step 3.5.3 Delete the outdated snapshot
+```
+yc compute snapshot delete --name pg-data-disk-snapshot
+``` 
+
+## _Congratulations! You have completed this module!_
