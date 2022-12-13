@@ -41,7 +41,7 @@ resource "yandex_compute_instance" "pg_docker_instance" {
 
   network_interface {
       subnet_id       = var.subnet.id
-      ip_address      = var.pg_private_ip_address
+      ip_address      = cidrhost(var.subnet.v4_cidr_blocks[0], 101)
   }  
 
   metadata = {

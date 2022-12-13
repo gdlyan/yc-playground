@@ -13,6 +13,12 @@ variable "folder_id" {
   type        = string
 }
 
+variable "recreate_data_disk" {
+ description = "none - use existing disk; empty - create new empty disk; snapshot - create from snapshot with the name == variable value"
+ type        = string
+ default     = "none"
+}
+
 variable "default_user" {
   type        = string
   default     = "tutorial"
@@ -30,11 +36,5 @@ variable "postgres_password" {
 
 variable "pgadmin_credentials" {
   type        =  object({email = string, password = string})  
-}
-
-variable "recreate_data_disk" {
- description = "none - use existing disk; empty - create new empty disk; snapshot - create from snapshot with the name == variable value"
- type        = string
- default     = "none"
 }
 
