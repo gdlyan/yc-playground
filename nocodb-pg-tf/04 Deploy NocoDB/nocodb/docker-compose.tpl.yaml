@@ -1,0 +1,10 @@
+version: '3'
+services:
+  nocodb_app: 
+    container_name: nocodb_app
+    environment: 
+      NC_DB: "pg://${PG_INSTANCE_PRIVATE_IP}:5432?u=${POSTGRES_USER}&p=${POSTGRES_PASSWORD}&d=${NOCODB_DATABASE}" 
+    image: "nocodb/nocodb:0.99.0"
+    ports:
+      - 80:8080
+    restart: always

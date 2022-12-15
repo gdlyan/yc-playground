@@ -10,7 +10,7 @@ In this tutorial we will:
 ## Prerequisites
 - You need to have the [02 Create Network]() tutorial completed before starting this one
 - Please copy the folder "02 Create Network" into a new project directory. You may use `cp -R  '02 Create Network' '03 Create PostgreSQL Server'` command
-- Navigate to `03 Create PostgreSQL Server` directory and run `./dterraform init`
+- Navigate to `'03 Create PostgreSQL Server'` directory and run `./dterraform init`
 - During completion of [02 Create Network]() tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
 ```
 ssh-keygen -C "tutorial"  -f ~/.ssh/tutorial_id_rsa -t rsa -b 4096
@@ -20,9 +20,21 @@ ssh-keygen -C "tutorial"  -f ~/.ssh/tutorial_id_rsa -t rsa -b 4096
 ```
 mkdir "postgres" && cd "$_"
 ```
-### Step 3.1.2 Copy the providers.tf file from the project directory to the module directory
+### Step 3.1.2 Create the `providers.tf` for the `postgres` module
+On top of the `yandex` provier we will be using the `template` provider in this module. So the `./postgres/providers.tf` file content should be as follows:
 ```
-cp ../providers.tf .
+terraform {
+  required_providers {
+    yandex = {
+      source = "yandex-cloud/yandex"
+    }  
+    template = {
+      source = "hashicorp/template"
+      version = ">= 2.2.0"
+    }            
+  }
+  required_version = ">= 0.13"
+}
 ```
 ## Step 3.2 Create a virtual disk for our PostgreSQL server to store its data
 In Yandex Cloud when we create a virtual machine we must specify at least one *boot disk* that will function like a disk drive in the computer. Normally, when you destroy the machine, the boot disk is destroyed as well. It is a bad idea to store the data on the boot disk that is not detachable. Doing so we set ourselves up to lose data permanently every time the virtual machine is destroyed.
