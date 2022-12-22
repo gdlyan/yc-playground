@@ -608,6 +608,6 @@ In the [Yandex Cloud Console](https://console.cloud.yandex.com/) navigate to the
 
 ## Congratulations! You have learned how to create a Terraform manifest that deploys the generic database app MVP to the Web
 Further learning steps may include:
-- Making the app more secure, e.g. implement the firewall rules that only allow the traffic that is required by the apps to function properly and prohibits everything else, protect from DDoS attacks, keeping secrets in the vaults etc.
+- Making the app more secure, e.g. implement the firewall rules that only allow the traffic that is required by the apps to function properly and prohibits everything else, protect from DDoS attacks, keeping secrets in the vaults, using a private container registry instead of DockerHub etc.
 - Making the app more scalable and production ready, e.g. migration of the prototype/MVP to the specialized managed services (Postgres, Kubernetes, Application Load Balancer), add logging and monitoring functionality, stress tesing etc.   
 - Investigating possible use cases for NocoDB in the areas of rapid solutions prototyping and MVP development    
