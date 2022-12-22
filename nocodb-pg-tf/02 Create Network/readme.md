@@ -476,7 +476,7 @@ Navigate to the *project* directory and subsequently run the commands:
 - `/.dterraform apply --auto-approve`
 - `/.dterraform destroy --auto-approve`
 
-Once configuration applied (after `/.dterraform apply --auto-approve`) login to Yandex Cloud account and open the relevant folder. Check that the following new resources are there on the cards of the "Folder Services" grid: 
+Once configuration applied (after `/.dterraform apply --auto-approve`) login to [Yandex Cloud account in the console](https://console.cloud.yandex.com/) and open the relevant folder. Check that the following new resources are there on the cards of the "Folder Services" grid: 
 - one new network, four new subnets and one new address on the "Virtual Private Cloud" card
 - one new VM and one new disk on the "Compute Cloud" card
 

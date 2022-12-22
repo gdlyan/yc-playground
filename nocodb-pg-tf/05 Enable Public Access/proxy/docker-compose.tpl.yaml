@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+    proxy:
+        image: nginx
+        container_name: web-proxy
+        restart: always
+        ports:
+        - 80:80
+        - 443:443
+        volumes:
+        - /home/${DEFAULT_USER}/certs:/etc/nginx/certs:ro
+        - /home/${DEFAULT_USER}/nginx/nginx.conf:/etc/nginx/conf.d/default.conf

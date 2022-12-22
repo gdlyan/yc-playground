@@ -8,7 +8,7 @@ In this tutorial we will:
 
 ## Prerequisites
 - You need to have the [`03 Create PostgreSQL Server`]() tutorial completed before starting this one
-- Please copy the folder "04 Deploy NocoDB" into a new project directory. We will further refer to "04 Deploy NocoDB" as to our *root module* directory or *project*  directory. You may use `cp -R  '03 Create PostgreSQL Server' '04 Deploy NocoDB'` command
+- Please copy the folder "03 Create PostgreSQL Server" into a new project directory named "04 Deploy NocoDB". We will further refer to "04 Deploy NocoDB" as to our *root module* directory or *project*  directory. You may use `cp -R  '03 Create PostgreSQL Server' '04 Deploy NocoDB'` command
 - Navigate to `'04 Deploy NocoDB'` directory and run `./dterraform init`.  
 - During completion of [02 Create Network]() tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
 ```
@@ -299,7 +299,7 @@ module "nocodb" {
 }
 ``` 
 
-### Step 4.3.4 Let the `nocodb` module output the IP address of the network load balancer and some information required to access the ocodb instances directly   
+### Step 4.3.4 Let the `nocodb` module output the IP address of the network load balancer and some information required to access the Nocodb instances directly   
 In the `nocodb` module directory create the file `outputs.tf` with the following content:
 ```
 output "nlb_instance_private_ip" {
@@ -353,7 +353,7 @@ We have added one more -L argument that tells the tunnel to forward all the requ
 You will be directed to the Nocodb signup page. Signup with a new user and explore the NocoDB functionality. So far, it is beyond the scope of this class, but the tool is simple to use and straightforward to learn. 
 > A reminder again: if you are working from the Yandex Cloud Toolbox machine, you have no browser there. You can instead install the `tutorial_id_rsa` provate key into ~/.ssh folder on your local machine that does have a browser and run the same ssh command locally
 ### Step 4.4.4 Review the changes in the Yandex Cloud Console
-In the [Yandex Cloud Console](https://console.cloud.yandex.com/) navigate to the project *folder* and on the "Folder services" panel click on the "Netwok Load Balaner" card. You will be directed to a list of load balancers, which will most likely consist of only one entry. Click on the `load-balancer` record  to open the load balancer overview. In the bottom of the overview locate the "Target groups" section and expand the `web-service-tg` target group. You will see the list of three NocoDB virtual machines' IP addresses alongside their status (most likely "Healthy"). Remember the IP addresses to use them in the next step.  
+In the [Yandex Cloud Console](https://console.cloud.yandex.com/) navigate to the project *folder* and on the "Folder services" panel click on the "Network Load Balancer" card. You will be directed to a list of load balancers, which will most likely consist of only one entry. Click on the `load-balancer` record  to open the load balancer overview. In the bottom of the overview locate the "Target groups" section and expand the `web-service-tg` target group. You will see the list of three NocoDB virtual machines' IP addresses alongside their status (most likely "Healthy"). Remember the IP addresses to use them in the next step.  
 ### Step 4.4.4 Examine the NocoDB instances from the inside
 - Choose one of the three newly generated NocoDB instances at random. In the SSH session with the NAT instance run `ssh -i ~/.ssh/tutorial_id_rsa tutorial@{NocoDB instance IP address}`. This will start an SSH session with the selected NocoDB virtua mchine
 - In the started SSH session run `docker ps`. THis command will print a list of one `nocodb_app` container running on this instance
