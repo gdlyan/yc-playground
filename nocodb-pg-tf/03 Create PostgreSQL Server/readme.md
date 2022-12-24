@@ -2,16 +2,16 @@
 In the end of the game we plan to deploy NocoDB, which is essentially a web app that allows users to easily develop specific types of database apps. NocoDB, despite having DB letters in its name, is not a database management system (DBMS). It is rather an application that simpifies the dialog between the developer and the DBMS, and there should be some 3rd party DBMS underhood. NocoDB supports many DBMS and Postgres is one of them. Postgres is a prominent free open-source DBMS that many people are familiar with. Indeed, Postgres was chosen for this tutorial solely for this reason. Other DBMS supported by Nocodb (such as MariaDB, MySQL, Microsoft SQL Server) are also suitable for this exercise, it's just the matter of preference. 
 
 In this tutorial we will:
-- Spawn PostgreSQL Server virtual machine from a container based on the [Postgres image available on Dockerhub](https://hub.docker.com/_/postgres/). To do so we will need the private network to be connected to Internet in order to pull images from Dockerhub (and this is what we have done on the previous step ['02 Create Network'](), when we deployed an *NAT instance*).
+- Spawn PostgreSQL Server virtual machine from a container based on the [Postgres image available on Dockerhub](https://hub.docker.com/_/postgres/). To do so we will need the private network to be connected to Internet in order to pull images from Dockerhub (and this is what we have done on the previous step ['02 Create Network'](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/02%20Create%20Network), when we deployed an *NAT instance*).
 - Deploy a docker network on the same virtual machine as Postgres, pull the [pgAdmin Docker image](https://hub.docker.com/r/dpage/pgadmin4/), start another container with pgAdmin, and link it to this network. PgAdmin is a web application for managing Postgres databases.
 - Create a persistent storage for the Postgres data, so that data is not lost when the Postgres virtual machine restarts or destroys
 - Enable http and ssh connection  to a virtual computer that does not have a public IP address.
 
 ## Prerequisites
-- You need to have the [02 Create Network]() tutorial completed before starting this one
+- You need to have the [02 Create Network](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/02%20Create%20Network) tutorial completed before starting this one
 - Please copy the folder "02 Create Network" into a new project directory. You may use `cp -R  '02 Create Network' '03 Create PostgreSQL Server'` command
 - Navigate to `'03 Create PostgreSQL Server'` directory and run `./dterraform init`
-- During completion of [02 Create Network]() tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
+- During completion of [02 Create Network](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/02%20Create%20Network) tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
 ```
 ssh-keygen -C "tutorial"  -f ~/.ssh/tutorial_id_rsa -t rsa -b 4096
 ```
