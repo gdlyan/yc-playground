@@ -19,10 +19,10 @@ Technically we will do the following:
 - Do the independent security check for our SSL/TLS enabled web server
 
 ## Prerequisites
-- You need to have the [`04 Deploy NocoDB`]() tutorial completed before starting this one
+- You need to have the ['04 Deploy NocoDB'](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/04%20Deploy%20NocoDB) tutorial completed before starting this one
 - Please copy the folder "04 Deploy NocoDB" into a new project directory named "05 Enable Public Access". We will further refer to "04 Deploy NocoDB" as to our *root module* directory or *project*  directory. You may use `cp -R  '04 Deploy NocoDB' '05 Enable Public Access'` command
 - Navigate to `'05 Enable Public Access'` directory and run `./dterraform init`.  
-- During completion of [02 Create Network]() tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
+- During completion of [02 Create Network](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/02%20Create%20Network) tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
 ```
 ssh-keygen -C "tutorial"  -f ~/.ssh/tutorial_id_rsa -t rsa -b 4096
 ```
