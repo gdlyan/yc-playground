@@ -141,7 +141,7 @@ Returning to `nocodb_instance_gr.tf` we see that it begins with the  `data "temp
 During the initialization every instance will use the received *docker-compose* manifest to: pull the NocoDB image from the DockerHub, run the container, connect to Postgres, serve NocoDB on port 80, and set the restart policies 
  
 ### Step 4.2.3 Create a service account for instances group deployment
-Yandex provider requires to specify a *service account* authorized to manage the instances group. In other words `service_account_id` is a required parameter for `yandex_compute_instance_group` resource. In the [step 4.2.1]() we have sent the value to this argument in the line `service_account_id = yandex_iam_service_account.nocodb_manager_sa.id`. Now we need to define the `yandex_iam_service_account.nocodb_manager_sa` and give it the `editor` role that is sufficient to create and destroy the virtual machines.
+Yandex provider requires to specify a *service account* authorized to manage the instances group. In other words `service_account_id` is a required parameter for `yandex_compute_instance_group` resource. In the [step 4.2.1](https://github.com/gdlyan/yc-playground/blob/master/nocodb-pg-tf/04%20Deploy%20NocoDB/readme.md#step-421-in-the-04-deploy-nocodbnocodb-module-directory-create-the-nocodb_instance_grtf-file-with-the-following-content) we have sent the value to this argument in the line `service_account_id = yandex_iam_service_account.nocodb_manager_sa.id`. Now we need to define the `yandex_iam_service_account.nocodb_manager_sa` and give it the `editor` role that is sufficient to create and destroy the virtual machines.
 
 In the `'04 Deploy NocoDB'/nocodb` module directory create the `service_account.tf` file with the following content
 ```
