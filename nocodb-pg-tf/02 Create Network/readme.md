@@ -24,7 +24,7 @@ We will also create a static route that would tell all the packets to travel via
 
 Operating systems on private subnet virtual machines would be able to connect to the Internet and receive installation packages, Docker images, and so on. However, because the instances would not have public IP addresses, they would be inaccessible without *tunneling* into the private network. To access the command shell on such a private virtual machine, one must first *ssh* into the NAT instance and then into the target computer's private IP address.  
 ## Prerequisites
-- You need to have the [01 Prepare Terraform to work with Yandex Cloud]() tutorial completed before starting this one
+- You need to have the [01 Prepare Terraform to work with Yandex Cloud](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/01%20Prepare%20Terraform%20for%20YC) tutorial completed before starting this one
 - Please copy the folder "01 Prepare Terraform to work with Yandex Cloud" into a new project directory. You may use `cp -R '01 Prepare Terraform for YC' '02 Create Network'` command
 - Navigate to `02 Create Network` directory and run `./dterraform init`
 - Generate password-less ssh keys, use the command below as an example
