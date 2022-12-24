@@ -205,12 +205,12 @@ Terraform will perform the following actions:
   - resource "yandex_vpc_network" "vpc" {
       - created_at  = "2022-12-01T14:48:39Z" -> null
       - description = "Terraform managed VPC for basic web-service" -> null
-      - folder_id   = "b1gq1bhui2gch9pkgas8" -> null
-      - id          = "enp19jmeku8i3l5dij50" -> null
+      - folder_id   = "{sanitized}" -> null
+      - id          = "{sanitized}" -> null
       - labels      = {} -> null
       - name        = "web-service-vpc-tf" -> null
       - subnet_ids  = [
-          - "e2ljs7da5ul0i1p0uh2j",
+          - "{sanitized}",
         ] -> null
     }
 
@@ -218,11 +218,11 @@ Terraform will perform the following actions:
   - resource "yandex_vpc_subnet" "web_front_subnets" {
       - created_at     = "2022-12-01T14:48:40Z" -> null
       - description    = "Public subnet for instances that are directly exposed to web-traffic such as Load balancers, NAT, gateways, bastions" -> null
-      - folder_id      = "b1gq1bhui2gch9pkgas8" -> null
-      - id             = "e2ljs7da5ul0i1p0uh2j" -> null
+      - folder_id      = "{sanitized}" -> null
+      - id             = "{sanitized}" -> null
       - labels         = {} -> null
       - name           = "web-service-vpc-tf-web-front-ru-central1-b-0" -> null
-      - network_id     = "enp19jmeku8i3l5dij50" -> null
+      - network_id     = "{sanitized}" -> null
       - v4_cidr_blocks = [
           - "10.129.0.0/24",
         ] -> null
@@ -295,9 +295,9 @@ This script declares a virtual machine created from a *nat-instance-ubuntu* imag
 
 We also provide this instance a public IP address by specifying `nat = true` on the *network_interface* section. We could assign the static IP, but this would incur some extra costs for us. In this experiment, we may do without a static IP address and prefer to allocate it dynamically. The public IP address would vary every time the instance was restarted. 
 
-It costs nothing extra for a private IP address to be static. That's why we make it static in the *network interface* section by specifying `ip address = var.nat ip address`. Remember that in the previous step, we declared the variable *nat ip address* and its default value.
+It costs nothing extra for a private IP address to be static. That's why we make it static in the *network interface* section by specifying `ip address = var.nat_ip_address`. Remember that in the previous step, we declared the variable *nat_ip_address* and its default value.
 
-Also note that the line `user-data = data.template_file.cloud_config_yaml.rendered` in the *metadata* section refers to something that we have not yet specified in our configuration. We normally use *user-data* to define the bootstrapping operations to be performed on the machine once is provisioned even before the first login. This may involve creation of users and granting them access, copying the public ssh-keys, packages installation, execution of shell commands etc. In the following few steps, we will define the *user-data*.
+Also note that the line `user-data = data.template_file.cloud_config_yaml.rendered` in the *metadata* section refers to something that we have not yet specified in our configuration. We normally use *user-data* to define the bootstrapping operations to be performed on the machine once it is provisioned even before the first login. This may involve creation of users and granting them access, copying the public ssh-keys, packages installation, execution of shell commands etc. In the following few steps, we will define the *user-data*.
 
 ### Step 2.2.4 In the *module* directory create the `cloud_config.tf` file with the following content:
 ```
@@ -448,7 +448,7 @@ output "nat_instance_public_ip" {
 }
 ``` 
 ### Step 2.4.2 Create the `outputs.tf` file in the *project* folder
-This is to test that the export is working and the module outputs are visible in the main project. We only test on a sample outputs, not the entire set. Note that the values are read from `module.vpc_subnets` outputs, not from Yandex Provider.
+This is to test that the export is working and the module outputs are visible in the main project. We only test on a sample outputs, not the entire set. Note that the values are read from `module.vpc_subnets` outputs rather than directly from the resource.
 
 The content of the `outputs.tf` should be as follows:
 ```
