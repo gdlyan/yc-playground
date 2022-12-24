@@ -1,16 +1,16 @@
 # 04 Deploy NocoDB on multiple instances
 In this tutorial we will:
 - Create a group of 3 virtual machines, one per availability zone
-- On each virtual machine pull the [NocoDB image available on Dockerhub](https://hub.docker.com/r/nocodb/nocodb), to do so  we will need the private network to be connected to Internet in order to pull images from Dockerhub (and this is what we have done on the  step ['02 Create Network'](), when we deployed an *NAT instance*). Once the image is pulled, run NocoDB app in the Docker container and connect it to PostgreSQL Server deployed previously on the step ['03 Create PotgreSQL Server']  
+- On each virtual machine pull the [NocoDB image available on Dockerhub](https://hub.docker.com/r/nocodb/nocodb), to do so  we will need the private network to be connected to Internet in order to pull images from Dockerhub (and this is what we have done on the  step ['02 Create Network'](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/02%20Create%20Network), when we deployed an *NAT instance*). Once the image is pulled, run NocoDB app in the Docker container and connect it to PostgreSQL Server deployed previously on the step ['03 Create PotgreSQL Server'](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/03%20Create%20PostgreSQL%20Server)  
 - Create a network load balancer that will check if the NocoDB machines are up and running as well as will serve a single point of contact for all the virtual machines in the group. It will receive connection requests and choose the best NocoDB machine to send the request to
 - Because we intentionally will not assign a private IP address to the load balancer, we will setup the ssh-tunnel such that http connections to the NocoDB app can be made from the machines having the private part of the ssh key installed 
 - We will also ssh into the NocoDB machines and examine its logs 
 
 ## Prerequisites
-- You need to have the [`03 Create PostgreSQL Server`]() tutorial completed before starting this one
+- You need to have the [`03 Create PostgreSQL Server`](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/03%20Create%20PostgreSQL%20Server) tutorial completed before starting this one
 - Please copy the folder "03 Create PostgreSQL Server" into a new project directory named "04 Deploy NocoDB". We will further refer to "04 Deploy NocoDB" as to our *root module* directory or *project*  directory. You may use `cp -R  '03 Create PostgreSQL Server' '04 Deploy NocoDB'` command
 - Navigate to `'04 Deploy NocoDB'` directory and run `./dterraform init`.  
-- During completion of [02 Create Network]() tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
+- During completion of [02 Create Network](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/02%20Create%20Network) tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
 ```
 ssh-keygen -C "tutorial"  -f ~/.ssh/tutorial_id_rsa -t rsa -b 4096
 ```
