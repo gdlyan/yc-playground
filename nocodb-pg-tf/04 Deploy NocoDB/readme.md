@@ -7,7 +7,7 @@ In this tutorial we will:
 - We will also ssh into the NocoDB machines and examine its logs 
 
 ## Prerequisites
-- You need to have the [`03 Create PostgreSQL Server`](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/03%20Create%20PostgreSQL%20Server) tutorial completed before starting this one
+- You need to have the ['03 Create PostgreSQL Server'](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/03%20Create%20PostgreSQL%20Server) tutorial completed before starting this one
 - Please copy the folder "03 Create PostgreSQL Server" into a new project directory named "04 Deploy NocoDB". We will further refer to "04 Deploy NocoDB" as to our *root module* directory or *project*  directory. You may use `cp -R  '03 Create PostgreSQL Server' '04 Deploy NocoDB'` command
 - Navigate to `'04 Deploy NocoDB'` directory and run `./dterraform init`.  
 - During completion of [02 Create Network](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/02%20Create%20Network) tutorial you should have generated  password-less ssh keys. If not yet, use the command below as an example
