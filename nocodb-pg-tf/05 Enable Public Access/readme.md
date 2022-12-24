@@ -588,7 +588,7 @@ If you applied Terraform  specifying `--var recreate_data_disk=empty`  you will 
 Otherwise you will come back to NocoDB in its state you left it last time or by the moment of the last snapshot if you recretate the data disk from the snapshot. 
 
 ### Step 5.5.3 In your browser go to `pgadmin.johnsmith.gq` (replace `johnsmith.gq` with your domain name)  
-If you applied Terraform  specifying `--var recreate_data_disk=empty`  you will have to totally repeat the [Step 3.4.13 Connect to PostgreSQL Server with pgAdmin]()
+If you applied Terraform  specifying `--var recreate_data_disk=empty`  you will have to totally repeat the [Step 3.4.13 Connect to PostgreSQL Server with pgAdmin](https://github.com/gdlyan/yc-playground/tree/master/nocodb-pg-tf/03%20Create%20PostgreSQL%20Server#step-3413-connect-to-postgresql-server-with-pgadmin)
 
 Otherwise you will be required to sign in to pgAdmin, but your connection to the PostgreSQL Server will persist 
 
