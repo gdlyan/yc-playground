@@ -7,3 +7,4 @@ tmp/
 *certs/
 *nginx/
 *.key
+cli-example-sh/*.yaml

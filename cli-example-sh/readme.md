@@ -1,0 +1,1 @@
+Shell files to practice CLI Yandex Cloud lesson from [Yandex Cloud Engineer Course](https://practicum.yandex.ru/ycloud/)  
