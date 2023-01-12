@@ -1,22 +1,24 @@
 name: ${YC_PREFIX}-instance-group
 service_account_id: ${YC_SERVICE_ACCOUNT}
 instance_template:
-    platform_id: standard-v1
+    platform_id: standard-v3
     resources_spec:
-        memory: 2g
+        memory: 1g
         cores: 2
+        core_fraction: 20
     boot_disk_spec:
         mode: READ_WRITE
         disk_spec:
-            image_id: ${YC_IMAGE_ID}
+            image_id: ${YC_IMAGE}
             type_id: network-hdd
             size: 32g             
     network_interface_specs:
-        - network_id: ${YC_VPC_NETWORK_ID}
-          primary_v4_address_spec: { one_to_one_nat_spec: { ip_version: IPV4 }}
+        - network_id: ${YC_VPC_NETWORK}
+          primary_v4_address_spec: {}
     scheduling_policy:
         preemptible: true
     metadata:
+      ssh-keys: "ubuntu:${TUTORIAL_SSH_KEY}"
       user-data: |-
         #cloud-config
           package_update: true
