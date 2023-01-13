@@ -1,0 +1,12 @@
+#!/bin/bash
+docker run  -it \
+    -w /opt \
+    -e PACKER_PLUGIN_PATH=/opt/.packer.d/plugins \
+    -e PKR_VAR_token="$(yc config get token)" \
+    -e PKR_VAR_cloud_id="$(yc config get cloud-id)" \
+    -e PKR_VAR_folder_id="$(yc config get folder-id)" \
+    -e PKR_VAR_subnet_id="$(yc vpc subnet list --format json | jq .[0].id | tr -d \")" \
+    -e PKR_VAR_zone_id="$(yc vpc subnet list --format json | jq .[0].zone_id | tr -d \")" \
+    -v "$(pwd)"/:/opt/ \
+    hashicorp/packer:1.8 $@
+    

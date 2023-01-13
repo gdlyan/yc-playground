@@ -15,7 +15,7 @@ Additionally, if Terraform and Ansible are already installed locally, you can us
 - Linux / MacOS / Windows with WSL2 machine connected to Internet
 - Docker and optionally Compose
 - Yandex Cloud account that has a payment method activated, [see how-to](https://cloud.yandex.com/en-ru/docs/billing/operations/create-new-account)
-- Yandex cloud CLI installed with `curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash` and initialized with `yc init` as explained in the [Getting started with the YC CLI manual](https://cloud.yandex.com/en-ru/docs/cli/quickstart). 
+- Yandex Cloud CLI installed with `curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash` and initialized with `yc init` as explained in the [Getting started with the YC CLI manual](https://cloud.yandex.com/en-ru/docs/cli/quickstart). 
 - A pair of ssh keys whereas a public key would be uploaded to the provisioned virtual machines. Please note that `./dansible-playbook` will fail with passphrase protected keys, this is a known issue. The workaround is either to avoid passphrase-encrypted private keys or to have Ansible installed locally and use regular `ansible-playbook` command  
 - You will need to create a file `./terraform.tfvars` with the following content:
 ```
