@@ -15,6 +15,10 @@ instance_template:
     network_interface_specs:
         - network_id: ${YC_VPC_NETWORK}
           primary_v4_address_spec: {}
+          subnet_ids:
+            - ${YC_VPC_SUBNET_A}
+            - ${YC_VPC_SUBNET_B}
+            - ${YC_VPC_SUBNET_C}
     scheduling_policy:
         preemptible: true
     metadata:
@@ -26,8 +30,8 @@ instance_template:
             - [apt-get, install, -y, nginx ]
             - [/bin/bash, -c, 'source /etc/lsb-release; sed -i "s/Welcome to nginx/It is $(hostname) on $DISTRIB_DESCRIPTION/" /var/www/html/index.nginx-debian.html']         
 deploy_policy:
-    max_unavailable: 1
-    max_expansion: 0
+    max_unavailable: 0
+    max_expansion: 1
 scale_policy:
     fixed_scale:
         size: 3

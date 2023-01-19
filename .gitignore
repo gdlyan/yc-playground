@@ -7,4 +7,4 @@ tmp/
 *certs/
 *nginx/
 *.key
-cli-example-sh/*.yaml
+cli-example-sh/ig-spec.yaml
