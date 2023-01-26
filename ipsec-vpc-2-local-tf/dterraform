@@ -1,0 +1,14 @@
+#!/bin/bash
+docker run  -it \
+            -w /opt \
+            -e TF_VAR_token="$(yc iam create-token)" \
+            -e TF_VAR_cloud_id="$(yc config get cloud-id)" \
+            -e TF_VAR_folder_id="$(yc config get folder-id)" \
+            -e TF_VAR_local_public_ip="$(curl -s ifconfig.co)" \
+            -e TF_VAR_local_subnet="$(ip -j route get 8.8.8.8 | jq -r '.[0].prefsrc')/24" \
+            -e TF_VAR_project_dir="$(pwd)" \
+            -v "$(pwd)"/:/opt/ \
+            -v ~/.ssh:/root/.ssh \
+            -v "$(pwd)"/.terraformrc:/root/.terraformrc \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            hashicorp/terraform:1.3.5 $@

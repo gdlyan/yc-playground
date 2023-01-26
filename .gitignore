@@ -8,3 +8,5 @@ tmp/
 *nginx/
 *.key
 cli-example-sh/ig-spec.yaml
+ipsec.conf
+ipsec.secrets
