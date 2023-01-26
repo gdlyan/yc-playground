@@ -26,7 +26,6 @@ variable "local_subnet" {
 
 variable "psk" {
     type = string
-    default = "BlaBlaPSK"
 }
 
 variable "ipsec_conf_local_dir" {

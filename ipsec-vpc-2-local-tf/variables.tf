@@ -28,6 +28,13 @@ variable "project_dir" {
   default     = "null"    
 }
 
+
 locals {
   ipsec_conf_local_dir = var.project_dir == "null" ? "${abspath(path.module)}/ipsec-config/local" : "${var.project_dir}/ipsec-config/local"
+}
+
+resource "random_string" "psk" {
+  length  = 20
+  special = false
+  upper   = true
 }

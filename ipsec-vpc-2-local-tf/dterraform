@@ -5,7 +5,7 @@ docker run  -it \
             -e TF_VAR_cloud_id="$(yc config get cloud-id)" \
             -e TF_VAR_folder_id="$(yc config get folder-id)" \
             -e TF_VAR_local_public_ip="$(curl -s ifconfig.co)" \
-            -e TF_VAR_local_subnet="$(ip -j route get 8.8.8.8 | jq -r '.[0].prefsrc')/24" \
+            -e TF_VAR_local_subnet="$(ip -j route get 8.8.8.8 | jq -r '.[0].prefsrc')/32" \
             -e TF_VAR_project_dir="$(pwd)" \
             -v "$(pwd)"/:/opt/ \
             -v ~/.ssh:/root/.ssh \
