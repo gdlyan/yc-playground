@@ -23,3 +23,23 @@ output "ipsec_instance_public_ip" {
    description = "Public IP of IPSec instance and ssh bastion"
    value       = yandex_compute_instance.ipsec_instance_tf.network_interface.0.nat_ip_address
 }
+
+output "sg_vpn_id" {
+   description = "ID of securty group for VPN"
+   value       = yandex_vpc_security_group.vpn.id
+}
+
+output "sg_app_id" {
+   description = "ID of securty group for VPN"
+   value       = yandex_vpc_security_group.app.id
+}
+
+output "sg_mdb_id" {
+   description = "ID of securty group for VPN"
+   value       = yandex_vpc_security_group.postgres.id
+}
+
+output "sg_proxy_id" {
+   description = "ID of securty group for VPN"
+   value       = yandex_vpc_security_group.proxy.id
+}

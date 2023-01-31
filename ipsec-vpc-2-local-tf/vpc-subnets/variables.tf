@@ -18,7 +18,10 @@ variable "ipsec_ip_address" {
 variable "local_subnet" {
  description = "CIDR of local subnet to be connected to cloud via IPSec "
  type =  string
- default = "192.168.68.0/24"
+}
+
+variable "local_public_ip" {
+    type = string
 }
 
 variable "default_user" {

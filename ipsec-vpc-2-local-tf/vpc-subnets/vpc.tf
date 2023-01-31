@@ -14,6 +14,12 @@ resource "yandex_vpc_subnet" "web_front_subnets" {
   v4_cidr_blocks = var.web_front_subnets[count.index].v4_cidr_blocks
 }
 
+# Create gateway
+resource "yandex_vpc_gateway" "gateway" {
+  name = "gateway"
+  shared_egress_gateway {}
+}
+
 # Create route table
 resource "yandex_vpc_route_table" "ipsec_rt_tf" {
   name = "ipsec-rt-tf"
@@ -23,6 +29,11 @@ resource "yandex_vpc_route_table" "ipsec_rt_tf" {
   static_route {
      destination_prefix = var.local_subnet
      next_hop_address = var.ipsec_ip_address
+  }
+
+  static_route {
+     destination_prefix = "0.0.0.0/0"
+     gateway_id         = yandex_vpc_gateway.gateway.id
   }
 }
 

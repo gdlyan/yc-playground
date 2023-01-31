@@ -28,6 +28,11 @@ variable "project_dir" {
   default     = "null"    
 }
 
+variable "domain" {
+  description = "Second level domain, for example johnsmith.jq"
+  type        = string
+}
+
 
 locals {
   ipsec_conf_local_dir = var.project_dir == "null" ? "${abspath(path.module)}/ipsec-config/local" : "${var.project_dir}/ipsec-config/local"

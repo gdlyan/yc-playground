@@ -14,6 +14,7 @@ variable "ipsec_instance_public_ip" {
 
 variable "cloud_subnet" {
     type = string
+    default = "10.128.0.0/9"
 }
 
 variable "local_public_ip" {

@@ -28,7 +28,8 @@ resource "yandex_compute_instance" "ipsec_instance_tf" {
       subnet_id  = yandex_vpc_subnet.web_front_subnets.0.id
       ip_address = var.ipsec_ip_address
       nat        = true
-  }
+      security_group_ids = [yandex_vpc_security_group.vpn.id]
+  } 
 
   metadata = {
       user-data = data.template_file.cloud_config_yaml.rendered
