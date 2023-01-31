@@ -43,3 +43,8 @@ resource "random_string" "psk" {
   special = false
   upper   = true
 }
+
+variable "sqlpassword" {
+  type = string
+  default = "random"
+}

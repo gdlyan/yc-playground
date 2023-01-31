@@ -1,0 +1,4 @@
+#!/bin/bash
+./preserve_mdb
+./terraform destroy --auto-approve
+./import_mdb

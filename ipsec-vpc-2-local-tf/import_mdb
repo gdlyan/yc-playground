@@ -1,0 +1,12 @@
+#!/bin/bash
+./terraform import module.managed_db.yandex_mdb_postgresql_cluster.pg_nano `yc managed-postgresql cluster get nocodb_postgresql --format json | jq '.id' | tr -d \"`
+./terraform import module.managed_db.yandex_mdb_postgresql_user.uid `yc managed-postgresql cluster get nocodb_postgresql --format json | jq '.id' | tr -d \"`:dbuser
+./terraform import module.managed_db.yandex_mdb_postgresql_database.database `yc managed-postgresql cluster get nocodb_postgresql --format json | jq '.id' | tr -d \"`:nocodb
+./terraform import module.vpc_subnets.yandex_vpc_network.vpc `yc vpc network get autovpc --format json | jq '.id' | tr -d \"`
+./terraform import module.vpc_subnets.yandex_vpc_subnet.web_front_subnets[0] `yc vpc subnet get autovpc-front-ru-central1-b-0 --format json | jq '.id' | tr -d \"`
+./terraform import module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[0] `yc vpc subnet get autovpc-back-ru-central1-a-0 --format json | jq '.id' | tr -d \"`
+./terraform import module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[1] `yc vpc subnet get autovpc-back-ru-central1-b-1 --format json | jq '.id' | tr -d \"`
+./terraform import module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[2] `yc vpc subnet get autovpc-back-ru-central1-c-2 --format json | jq '.id' | tr -d \"`
+./terraform import module.vpc_subnets.yandex_vpc_security_group.postgres `yc vpc security-group get pgmdb-sg-tf --format json | jq '.id' | tr -d \"`
+./terraform import module.vpc_subnets.yandex_vpc_gateway.gateway `yc vpc gateway get gateway --format json | jq '.id' | tr -d \"`
+./terraform import module.vpc_subnets.yandex_vpc_route_table.ipsec_rt_tf `yc vpc route-table get ipsec-rt-tf --format json | jq '.id' | tr -d \"`

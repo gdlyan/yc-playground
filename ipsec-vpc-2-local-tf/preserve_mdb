@@ -1,0 +1,13 @@
+#!/bin/bash
+terraform state rm \
+  module.managed_db.yandex_mdb_postgresql_cluster.pg_nano \
+  module.managed_db.yandex_mdb_postgresql_user.uid \
+  module.managed_db.yandex_mdb_postgresql_database.database \
+  module.vpc_subnets.yandex_vpc_security_group.postgres \
+  module.vpc_subnets.yandex_vpc_route_table.ipsec_rt_tf \
+  module.vpc_subnets.yandex_vpc_gateway.gateway \
+  module.vpc_subnets.yandex_vpc_subnet.web_front_subnets[0] \
+  module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[0] \
+  module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[1] \
+  module.vpc_subnets.yandex_vpc_subnet.webapp_subnets[2] \
+  module.vpc_subnets.yandex_vpc_network.vpc

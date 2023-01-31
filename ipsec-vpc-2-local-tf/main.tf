@@ -26,6 +26,7 @@ module "managed_db" {
   source = "./managed-db"
   dbname = "nocodb"
   dbuser = "dbuser"
+  sqlpassword = var.sqlpassword
   sg_mdb_id = module.vpc_subnets.sg_mdb_id
 }
 
